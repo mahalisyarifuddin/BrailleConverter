@@ -505,13 +505,20 @@
 					<label class="inline-label" id="scriptLabel" for="script"></label>
 					<select id="script">
 						<option value="en">English</option>
+						<option value="nl">Nederlands (Dutch)</option>
 						<option value="fr">Français (French)</option>
 						<option value="de">Deutsch (German)</option>
 						<option value="es">Español (Spanish)</option>
 						<option value="pt">Português (Portuguese)</option>
 						<option value="it">Italiano (Italian)</option>
 						<option value="id2">Indonesian / Malay</option>
+						<option value="pl">Polski (Polish)</option>
+						<option value="tr">Türkçe (Turkish)</option>
+						<option value="uk">Українська (Ukrainian)</option>
 						<option value="ru">Русский (Russian)</option>
+						<option value="el">Ελληνικά (Greek)</option>
+						<option value="he">עברית (Hebrew)</option>
+						<option value="ar">العربية (Arabic)</option>
 					</select>
 					<span class="tag" id="gradeTag"></span>
 				</div>
@@ -601,7 +608,7 @@
 			const text = {
 				en: {
 					title: 'Braille Converter',
-					subtitle: 'Convert text to Braille (Unicode or dot notation) and vice versa. Supports English, French, German, Spanish, Portuguese, Italian, Indonesian, and Russian.',
+					subtitle: 'Convert text to Braille (Unicode or dot notation) and vice versa. Supports English, Dutch, French, German, Spanish, Portuguese, Italian, Indonesian, Polish, Turkish, Ukrainian, Russian, Greek, Hebrew, and Arabic.',
 					scriptLabel: 'Script:',
 					gradeTag: 'Grade 1 · Uncontracted',
 					dirLabel: 'Mode:',
@@ -618,7 +625,7 @@
 					copyBtn: 'Copy',
 					copiedBtn: 'Copied ✓',
 					placeholder: '—',
-					footNote: 'Grade 1 (uncontracted) braille only. Capitals are prefixed with the capital sign ⠠ (dot 6). Numbers are prefixed with the number sign ⠼ (dots 3-4-5-6). Dot notation format: space-separated cells, each cell listed as its raised dot numbers (e.g. 125 for ⠓ h); use 0 for a blank/space cell. Russian uses phonetic-correspondence mapping per the international standard (в→⠺, ц→⠉, ч→⠟, щ→⠭).',
+					footNote: 'Grade 1 (uncontracted) braille only. Capitals are prefixed with the capital sign ⠠ (dot 6). Numbers are prefixed with the number sign ⠼ (dots 3-4-5-6). Dot notation format: space-separated cells, each cell listed as its raised dot numbers (e.g. 125 for ⠓ h); use 0 for a blank/space cell. Supports Eastern Arabic and Persian digits. For RTL scripts like Arabic and Hebrew, Braille remains left-to-right.',
 					captionTB: 'Enter plain text. Capitals are handled automatically.',
 					captionBT: 'Paste Braille Unicode characters (e.g. ⠓⠑⠇⠇⠕).',
 					captionDots: 'Enter space-separated dot cells. Use digit strings per cell (e.g. "125 15 123 123 135"), and 0 for blank. Optionally prefix cap sign: "6 125 = ⠠H".',
@@ -628,7 +635,7 @@
 				},
 				id: {
 					title: 'Konverter Braille',
-					subtitle: 'Konversi teks ke Braille (Unicode atau notasi titik) dan sebaliknya. Mendukung Inggris, Prancis, Jerman, Spanyol, Portugis, Italia, Indonesia, dan Rusia.',
+					subtitle: 'Konversi teks ke Braille (Unicode atau notasi titik) dan sebaliknya. Mendukung bahasa Inggris, Belanda, Prancis, Jerman, Spanyol, Portugis, Italia, Indonesia, Polandia, Turki, Ukraina, Rusia, Yunani, Ibrani, dan Arab.',
 					scriptLabel: 'Aksara:',
 					gradeTag: 'Kelas 1 · Tidak Disingkat',
 					dirLabel: 'Mode:',
@@ -645,7 +652,7 @@
 					copyBtn: 'Salin',
 					copiedBtn: 'Disalin ✓',
 					placeholder: '—',
-					footNote: 'Hanya braille kelas 1 (tidak disingkat). Huruf kapital diawali tanda kapital ⠠ (titik 6). Angka diawali tanda angka ⠼ (titik 3-4-5-6). Format notasi titik: sel dipisah spasi, tiap sel adalah string angka titik yang raised (mis. 125 untuk ⠓ h); gunakan 0 untuk sel kosong/spasi. Bahasa Rusia menggunakan pemetaan korespondensi fonetik.',
+					footNote: 'Hanya braille kelas 1 (tidak disingkat). Huruf kapital diawali tanda kapital ⠠ (titik 6). Angka diawali tanda angka ⠼ (titik 3-4-5-6). Format notasi titik: sel dipisah spasi, tiap sel adalah string angka titik yang raised (mis. 125 untuk ⠓ h); gunakan 0 untuk sel kosong/spasi. Mendukung angka Arab Timur dan Persia. Untuk aksara kanan-ke-kiri seperti Arab dan Ibrani, Braille tetap dibaca kiri-ke-kanan.',
 					captionTB: 'Masukkan teks biasa. Huruf kapital ditangani otomatis.',
 					captionBT: 'Tempel karakter Braille Unicode (mis. ⠓⠑⠇⠇⠕).',
 					captionDots: 'Masukkan sel titik dipisah spasi. Gunakan string digit per sel (mis. "125 15 123 123 135"), dan 0 untuk kosong.',
@@ -703,25 +710,23 @@
 			};
 
 			const DIGITS = {
-				'1': d(1),
-				'2': d(1, 2),
-				'3': d(1, 4),
-				'4': d(1, 4, 5),
-				'5': d(1, 5),
-				'6': d(1, 2, 4),
-				'7': d(1, 2, 4, 5),
-				'8': d(1, 2, 5),
-				'9': d(2, 4),
-				'0': d(2, 4, 5)
+				'1': d(1), '2': d(1, 2), '3': d(1, 4), '4': d(1, 4, 5), '5': d(1, 5),
+				'6': d(1, 2, 4), '7': d(1, 2, 4, 5), '8': d(1, 2, 5), '9': d(2, 4), '0': d(2, 4, 5),
+				// Eastern Arabic
+				'١': d(1), '٢': d(1, 2), '٣': d(1, 4), '٤': d(1, 4, 5), '٥': d(1, 5),
+				'٦': d(1, 2, 4), '٧': d(1, 2, 4, 5), '٨': d(1, 2, 5), '٩': d(2, 4), '٠': d(2, 4, 5),
+				// Persian
+				'۱': d(1), '۲': d(1, 2), '۳': d(1, 4), '۴': d(1, 4, 5), '۵': d(1, 5),
+				'۶': d(1, 2, 4), '۷': d(1, 2, 4, 5), '۸': d(1, 2, 5), '۹': d(2, 4), '۰': d(2, 4, 5)
 			};
 
 			const PUNCT = {
-				',': d(2),
-				';': d(2, 3),
+				',': d(2), '،': d(2),
+				';': d(2, 3), '؛': d(2, 3),
 				':': d(2, 5),
 				'.': d(2, 5, 6),
 				'!': d(2, 3, 5),
-				'?': d(2, 3, 6),
+				'?': d(2, 3, 6), '؟': d(2, 3, 6),
 				"'": d(3),
 				'-': d(3, 6),
 				'(': d(1, 2, 3, 5, 6),
@@ -734,6 +739,12 @@
 			const SCRIPTS = {
 				en: {
 					name: 'English',
+					letters: {
+						...BASE
+					}
+				},
+				nl: {
+					name: 'Nederlands (Dutch)',
 					letters: {
 						...BASE
 					}
@@ -824,39 +835,75 @@
 				ru: {
 					name: 'Русский',
 					letters: {
-						'а': d(1),
-						'б': d(1, 2),
-						'в': d(2, 4, 5, 6),
-						'г': d(1, 2, 4, 5),
-						'д': d(1, 4, 5),
-						'е': d(1, 5),
-						'ё': d(1, 6),
-						'ж': d(2, 4, 5),
-						'з': d(1, 3, 5, 6),
-						'и': d(2, 4),
-						'й': d(1, 2, 3, 4, 6),
-						'к': d(1, 3),
-						'л': d(1, 2, 3),
-						'м': d(1, 3, 4),
-						'н': d(1, 3, 4, 5),
-						'о': d(1, 3, 5),
-						'п': d(1, 2, 3, 4),
-						'р': d(1, 2, 3, 5),
-						'с': d(2, 3, 4),
-						'т': d(2, 3, 4, 5),
-						'у': d(1, 3, 6),
-						'ф': d(1, 2, 4),
-						'х': d(1, 2, 5),
-						'ц': d(1, 4),
-						'ч': d(1, 2, 3, 4, 5),
-						'ш': d(1, 5, 6),
-						'щ': d(1, 3, 4, 6),
-						'ъ': d(1, 2, 3, 5, 6),
-						'ы': d(2, 3, 4, 6),
-						'ь': d(2, 3, 4, 5, 6),
-						'э': d(2, 4, 6),
-						'ю': d(1, 2, 5, 6),
-						'я': d(1, 2, 4, 6)
+						'а': d(1), 'б': d(1, 2), 'в': d(2, 4, 5, 6), 'г': d(1, 2, 4, 5), 'д': d(1, 4, 5),
+						'е': d(1, 5), 'ё': d(1, 6), 'ж': d(2, 4, 5), 'з': d(1, 3, 5, 6), 'и': d(2, 4),
+						'й': d(1, 2, 3, 4, 6), 'к': d(1, 3), 'л': d(1, 2, 3), 'м': d(1, 3, 4), 'н': d(1, 3, 4, 5),
+						'о': d(1, 3, 5), 'п': d(1, 2, 3, 4), 'р': d(1, 2, 3, 5), 'с': d(2, 3, 4), 'т': d(2, 3, 4, 5),
+						'у': d(1, 3, 6), 'ф': d(1, 2, 4), 'х': d(1, 2, 5), 'ц': d(1, 4), 'ч': d(1, 2, 3, 4, 5),
+						'ш': d(1, 5, 6), 'щ': d(1, 3, 4, 6), 'ъ': d(1, 2, 3, 5, 6), 'ы': d(2, 3, 4, 6),
+						'ь': d(2, 3, 4, 5, 6), 'э': d(2, 4, 6), 'ю': d(1, 2, 5, 6), 'я': d(1, 2, 4, 6)
+					}
+				},
+				uk: {
+					name: 'Українська',
+					letters: {
+						'а': d(1), 'б': d(1, 2), 'в': d(2, 4, 5, 6), 'г': d(1, 2, 4, 5), 'ґ': d(1, 2, 4, 5, 6),
+						'д': d(1, 4, 5), 'е': d(1, 5), 'є': d(3, 4, 5), 'ж': d(2, 4, 5), 'з': d(1, 3, 5, 6),
+						'и': d(2, 4), 'і': d(1, 3, 4, 5, 6), 'ї': d(1, 4, 5, 6), 'й': d(1, 2, 3, 4, 6),
+						'к': d(1, 3), 'л': d(1, 2, 3), 'м': d(1, 3, 4), 'н': d(1, 3, 4, 5), 'о': d(1, 3, 5),
+						'п': d(1, 2, 3, 4), 'р': d(1, 2, 3, 5), 'с': d(2, 3, 4), 'т': d(2, 3, 4, 5),
+						'у': d(1, 3, 6), 'ф': d(1, 2, 4), 'х': d(1, 2, 5), 'ц': d(1, 4), 'ч': d(1, 2, 3, 4, 5),
+						'ш': d(1, 5, 6), 'щ': d(1, 3, 4, 6), 'ь': d(2, 3, 4, 5, 6), 'ю': d(1, 2, 5, 6), 'я': d(1, 2, 4, 6)
+					}
+				},
+				pl: {
+					name: 'Polski',
+					letters: {
+						...BASE,
+						'ą': d(1, 6), 'ć': d(1, 4, 6), 'ę': d(1, 5, 6), 'ł': d(1, 2, 6), 'ń': d(1, 4, 5, 6),
+						'ó': d(3, 4, 6), 'ś': d(2, 4, 6), 'ź': d(2, 3, 4, 6), 'ż': d(1, 2, 3, 4, 6)
+					}
+				},
+				tr: {
+					name: 'Türkçe',
+					letters: {
+						...BASE,
+						'ç': d(1, 6), 'ğ': d(1, 2, 6), 'ı': d(3, 5), 'ö': d(2, 4, 6), 'ş': d(1, 4, 6), 'ü': d(1, 2, 5, 6)
+					}
+				},
+				el: {
+					name: 'Ελληνικά',
+					letters: {
+						'α': d(1), 'β': d(1, 2), 'γ': d(1, 2, 4, 5), 'δ': d(1, 4, 5), 'ε': d(1, 5), 'ζ': d(1, 3, 5, 6),
+						'η': d(1, 5, 6), 'θ': d(1, 4, 5, 6), 'ι': d(2, 4), 'κ': d(1, 3), 'λ': d(1, 2, 3), 'μ': d(1, 3, 4),
+						'ν': d(1, 3, 4, 5), 'ξ': d(1, 3, 4, 6), 'ο': d(1, 3, 5), 'π': d(1, 2, 3, 4), 'ρ': d(1, 2, 3, 5),
+						'σ': d(2, 3, 4), 'ς': d(2, 3, 4), 'τ': d(2, 3, 4, 5), 'υ': d(1, 3, 6), 'φ': d(1, 2, 4),
+						'χ': d(1, 2, 3, 4, 6), 'ψ': d(1, 3, 4, 5, 6), 'ω': d(2, 4, 5, 6)
+					}
+				},
+				he: {
+					name: 'עברית',
+					letters: {
+						'א': d(1), 'ב': d(1, 2), 'ג': d(1, 2, 4, 5), 'ד': d(1, 4, 5), 'ה': d(1, 2, 5), 'ו': d(2, 4, 5, 6),
+						'ז': d(1, 3, 5, 6), 'ח': d(1, 3, 4, 6), 'ט': d(2, 3, 4, 5, 6), 'י': d(2, 4), 'כ': d(1, 3),
+						'ך': d(1, 3), 'ל': d(1, 2, 3), 'מ': d(1, 3, 4), 'ם': d(1, 3, 4), 'נ': d(1, 3, 4, 5),
+						'ן': d(1, 3, 4, 5), 'ס': d(2, 3, 4), 'ע': d(1, 2, 3, 4, 6), 'פ': d(1, 2, 3, 4), 'ף': d(1, 2, 3, 4),
+						'צ': d(1, 4, 6), 'ץ': d(1, 4, 6), 'ק': d(1, 2, 3, 4, 5), 'ר': d(1, 2, 3, 5), 'ש': d(1, 4, 5, 6),
+						'ת': d(2, 3, 4, 5)
+					}
+				},
+				ar: {
+					name: 'العربية',
+					letters: {
+						'ا': d(1), 'ب': d(1, 2), 'ت': d(2, 3, 4, 5), 'ث': d(1, 4, 5, 6), 'ج': d(2, 4, 5),
+						'ح': d(1, 5, 6), 'خ': d(1, 3, 4, 6), 'د': d(1, 4, 5), 'ذ': d(2, 3, 4, 6), 'ر': d(1, 2, 3, 5),
+						'ز': d(1, 3, 5, 6), 'س': d(2, 3, 4), 'ش': d(1, 4, 6), 'ص': d(1, 2, 3, 4, 6),
+						'ض': d(1, 2, 4, 6), 'ط': d(2, 3, 4, 5, 6), 'ظ': d(1, 2, 3, 4, 5, 6), 'ع': d(1, 2, 3, 5, 6),
+						'غ': d(1, 2, 6), 'ف': d(1, 2, 4), 'ق': d(1, 2, 3, 4, 5), 'ك': d(1, 3), 'ل': d(1, 2, 3),
+						'م': d(1, 3, 4), 'ن': d(1, 3, 4, 5), 'ه': d(1, 2, 5), 'و': d(2, 4, 5, 6), 'ي': d(2, 4),
+						'أ': d(3, 4), 'إ': d(4, 6), 'آ': d(3, 4, 5), 'ؤ': d(1, 2, 5, 6), 'ئ': d(1, 3, 4, 5, 6),
+						'ة': d(1, 6), 'ى': d(1, 3, 5), 'لا': d(1, 2, 3, 6), 'لأ': d(1, 2, 3, 5, 6), 'لإ': d(1, 2, 3, 4, 6),
+						'لآ': d(1, 2, 3, 4, 5, 6)
 					}
 				}
 			};
@@ -904,7 +951,7 @@
 						continue;
 					}
 
-					if (/[0-9]/.test(ch)) {
+					if (DIGITS[ch]) {
 						if (!inNum) {
 							cells.push({
 								braille: NUM_SIGN,
@@ -921,8 +968,8 @@
 					}
 					inNum = false;
 
-					const isUpper = (ch >= 'A' && ch <= 'Z') || (ch >= '\u0410' && ch <= '\u042F') || ch === '\u0401';
 					const lower = ch.toLowerCase();
+					const isUpper = ch !== lower;
 
 					if (letters[lower]) {
 						if (isUpper)

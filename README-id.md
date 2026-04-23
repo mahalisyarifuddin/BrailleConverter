@@ -12,9 +12,9 @@ Antarmuka mendukung Bahasa Inggris dan Bahasa Indonesia.
 
 ## Cara Kerja
 
-Konverter ini bekerja dengan memetakan karakter dari berbagai aksara ke pola Braille yang sesuai berdasarkan standar internasional untuk Braille Kelas 1 (tidak disingkat).
+Konverter ini bekerja dengan memetakan karakter dari berbagai aksara ke pola Braille yang sesuai berdasarkan standar internasional untuk Braille Kelas 1 (tidak disingkat). Mendukung aksara sumber Kiri-ke-Kanan (LTR) maupun Kanan-ke-Kiri (RTL), meskipun Braille sendiri selalu ditampilkan secara LTR.
 
-1.  **Teks ke Braille**: Mengonversi teks biasa menjadi Braille Unicode (misal: ⠓⠑⠇⠇⠕) dan notasi titik (misal: 125 15 123 123 135). Secara otomatis menangani huruf kapital menggunakan tanda kapital ⠠ (titik 6) dan angka menggunakan tanda angka ⠼ (titik 3-4-5-6).
+1.  **Teks ke Braille**: Mengonversi teks biasa menjadi Braille Unicode (misal: ⠓⠑⠇⠇⠕) dan notasi titik (misal: 125 15 123 123 135). Secara otomatis menangani huruf kapital menggunakan tanda kapital ⠠ (titik 6) dan angka menggunakan tanda angka ⠼ (titik 3-4-5-6). Juga mendukung angka Arab Timur (٠-٩) dan Persia (۰-۹).
 2.  **Braille ke Teks**: Mendekode karakter Braille Unicode kembali menjadi teks yang dapat dibaca, mengenali indikator kapital dan angka.
 3.  **Nomor Titik ke Braille/Teks**: Memungkinkan pengguna untuk memasukkan kombinasi titik tertentu (misal: "12" untuk ⠃) untuk menghasilkan karakter Braille dan teks yang sesuai.
 
@@ -27,7 +27,7 @@ Konverter ini bekerja dengan memetakan karakter dari berbagai aksara ke pola Bra
 
 ## Fitur Utama
 
-*   **Dukungan Multi-bahasa**: Mendukung Bahasa Inggris, Prancis, Jerman, Spanyol, Portugis, Italia, Indonesia, dan Rusia.
+*   **Dukungan Multi-bahasa**: Mendukung Bahasa Inggris, Belanda, Prancis, Jerman, Spanyol, Portugis, Italia, Indonesia, Polandia, Turki, Ukraina, Rusia, Yunani, Ibrani, dan Arab.
 *   **Berbagai Mode**: Teks → Braille, Braille → Teks, dan Nomor Titik → Braille/Teks.
 *   **Braille Kelas 1**: Berfokus pada Braille yang tidak disingkat untuk kejelasan dan kepatuhan standar.
 *   **Pratinjau Sel Visual**: Representasi visual opsional dari sel Braille dengan penomoran titik.
