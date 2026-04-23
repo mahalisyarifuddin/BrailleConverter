@@ -539,7 +539,6 @@
 				<div class="panel input-panel">
 					<div class="panel-header">
 						<span class="panel-title" id="inputPanelTitle"></span>
-						<button class="secondary btn-sm clear-btn-small" id="clearBtn" ></button>
 					</div>
 					<div class="seg no-margin" >
 						<label id="inputLabel" for="inputArea" class="hidden"></label>
@@ -547,7 +546,7 @@
 						<div id="inputCaption" class="caption"></div>
 					</div>
 					<div class="btn-row mt-auto" >
-						<button class="primary btn-sm convert-btn-large" id="convertBtn" ></button>
+						<button class="secondary btn-sm convert-btn-large" id="clearBtn"></button>
 					</div>
 				</div>
 
@@ -610,7 +609,6 @@
 					dirBT: 'Braille → Text',
 					dirDots: 'Dot Numbers → Braille / Text',
 					inputLabel: 'Input',
-					convertBtn: 'Convert',
 					clearBtn: 'Clear',
 					unicodeLabel: 'Braille Unicode',
 					dotsLabel: 'Dot Notation',
@@ -638,7 +636,6 @@
 					dirBT: 'Braille → Teks',
 					dirDots: 'Nomor Titik → Braille / Teks',
 					inputLabel: 'Masukan',
-					convertBtn: 'Konversi',
 					clearBtn: 'Hapus',
 					unicodeLabel: 'Braille Unicode',
 					dotsLabel: 'Notasi Titik',
@@ -1053,7 +1050,6 @@
 				_setup() {
 					el.language.onchange = e=>this._lang(e.target.value);
 					el.theme.onchange = e=>this._theme(e.target.value);
-					el.convertBtn.onclick = ()=>this._convert();
 					el.clearBtn.onclick = ()=>this._clear();
 					el.showVisual.onchange = ()=>this._toggleVisual();
 					el.inputArea.addEventListener('input', ()=>{
