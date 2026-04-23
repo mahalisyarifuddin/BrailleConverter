@@ -80,11 +80,125 @@
 				background: var(--surface);
 				border: 1px solid var(--border);
 				border-radius: 8px;
-				max-width: 960px;
+				max-width: 1100px;
 				padding: 2rem;
 				width: 100%;
 				position: relative;
 				margin: 2rem 0;
+			}
+
+			.main-layout {
+				display: grid;
+				grid-template-columns: 1fr 1fr;
+				gap: 1.5rem;
+				margin-top: 1.5rem;
+			}
+
+			.panel {
+				display: flex;
+				flex-direction: column;
+				gap: 1rem;
+				padding: 1.2rem;
+				border: 1px solid var(--border);
+				border-radius: 8px;
+				background: var(--surface);
+			}
+
+			.output-panel {
+				background: var(--muted);
+			}
+
+			.panel-header {
+				display: flex;
+				justify-content: space-between;
+				align-items: center;
+				border-bottom: 1px solid var(--border);
+				padding-bottom: .6rem;
+				margin-bottom: .4rem;
+			}
+
+			.panel-title {
+				font-weight: 700;
+				font-size: .9rem;
+				text-transform: uppercase;
+				color: var(--primary);
+			}
+
+			.swap-btn {
+				background: none;
+				border: 1px solid var(--border);
+				border-radius: 50%;
+				width: 36px;
+				height: 36px;
+				display: flex;
+				align-items: center;
+				justify-content: center;
+				cursor: pointer;
+				transition: background .2s;
+				padding: 0;
+			}
+
+			.swap-btn:hover {
+				background: var(--muted);
+			}
+
+			.swap-btn svg {
+				width: 20px;
+				height: 20px;
+				fill: var(--text);
+			}
+
+
+			.clear-btn-small {
+				width: auto;
+				padding: .2rem .6rem;
+			}
+			.main-textarea {
+				border: 0;
+				padding: 0;
+				min-height: 150px;
+				outline: none;
+				box-shadow: none;
+			}
+			.convert-btn-large {
+				padding: .45rem 1.4rem;
+				font-size: 1rem;
+			}
+			.no-margin {
+				margin: 0;
+			}
+			.mt-auto {
+				margin-top: auto;
+			}
+			.out-label-small {
+				margin: 0;
+				font-size: .85rem;
+				opacity: .8;
+			}
+			.copy-btn-small {
+				padding: .2rem .5rem;
+				font-size: .75rem;
+			}
+			.out-box-minimal {
+				background: transparent;
+				border: 0;
+				padding: .5rem 0;
+				min-height: 30px;
+			}
+			.visual-toggle {
+				font-weight: normal;
+				display: flex;
+				align-items: center;
+				gap: 6px;
+				cursor: pointer;
+				margin: 0;
+				font-size: .75rem;
+			}
+			.visual-box {
+				display: none;
+				min-height: 72px;
+				background: var(--surface);
+				margin-top: .5rem;
 			}
 
 			.hidden {
@@ -197,6 +311,10 @@
 
 				.row {
 					flex-direction: column;
+				}
+
+				.main-layout {
+					grid-template-columns: 1fr;
 				}
 			}
 
@@ -403,6 +521,9 @@
 						<input type="radio" name="dir" id="dirTBr" value="tb" checked>
 						<label for="dirTBr" id="dirTB"></label>
 					</div>
+					<button class="swap-btn" id="swapBtn" type="button" title="Swap languages">
+						<svg viewBox="0 0 24 24"><path d="M6.99 11L3 15l3.99 4v-3H14v-2H6.99v-3zM21 9l-3.99-4v3H10v2h7.01v3L21 9z"/></svg>
+					</button>
 					<div class="radio-wrap">
 						<input type="radio" name="dir" id="dirBTr" value="bt">
 						<label for="dirBTr" id="dirBT"></label>
@@ -413,53 +534,65 @@
 					</div>
 				</div>
 			</div>
-			<div class="seg">
-				<label id="inputLabel" for="inputArea"></label>
-				<textarea id="inputArea" rows="4" spellcheck="false"></textarea>
-				<div id="inputCaption" class="caption"></div>
-			</div>
-			<div class="btn-row">
-				<button class="primary btn-sm" id="convertBtn" style="padding:.45rem 1.4rem;font-size:1rem"></button>
-				<button class="secondary btn-sm" id="clearBtn"></button>
-			</div>
-			<hr class="divider">
-			<div id="outputSection">
-				<div id="unicodeSection" class="seg">
-					<div class="out-header">
-						<label id="unicodeLabel" style="margin:0"></label>
-						<button class="secondary btn-sm" id="copyUnicode"></button>
+
+			<div class="main-layout">
+				<div class="panel input-panel">
+					<div class="panel-header">
+						<span class="panel-title" id="inputPanelTitle"></span>
 					</div>
-					<div class="out-box braille-unicode" id="unicodeOutput">
-						<span class="placeholder-text" id="placeholderUni"></span>
+					<div class="seg no-margin" >
+						<label id="inputLabel" for="inputArea" class="hidden"></label>
+						<textarea id="inputArea" rows="8" spellcheck="false" class="main-textarea"></textarea>
+						<div id="inputCaption" class="caption"></div>
+					</div>
+					<div class="btn-row mt-auto" >
+						<button class="secondary btn-sm convert-btn-large" id="clearBtn"></button>
 					</div>
 				</div>
-				<div id="dotsSection" class="seg">
-					<div class="out-header">
-						<label id="dotsLabel" style="margin:0"></label>
-						<button class="secondary btn-sm" id="copyDots"></button>
+
+				<div class="panel output-panel">
+					<div class="panel-header">
+						<span class="panel-title" id="outputPanelTitle"></span>
 					</div>
-					<div class="out-box dots-mono" id="dotsOutput">
-						<span class="placeholder-text" id="placeholderDots"></span>
+					<div id="outputSection" class="no-margin" style="display:flex;flex-direction:column;gap:1rem">
+						<div id="unicodeSection" class="seg no-margin" >
+							<div class="out-header">
+								<label id="unicodeLabel" class="out-label-small"></label>
+								<button class="secondary btn-sm copy-btn-small" id="copyUnicode" ></button>
+							</div>
+							<div class="out-box braille-unicode out-box-minimal" id="unicodeOutput" >
+								<span class="placeholder-text" id="placeholderUni"></span>
+							</div>
+						</div>
+						<div id="dotsSection" class="seg no-margin" >
+							<div class="out-header">
+								<label id="dotsLabel" class="out-label-small"></label>
+								<button class="secondary btn-sm copy-btn-small" id="copyDots" ></button>
+							</div>
+							<div class="out-box dots-mono out-box-minimal" id="dotsOutput" >
+								<span class="placeholder-text" id="placeholderDots"></span>
+							</div>
+						</div>
+						<div id="textSection" class="seg no-margin" >
+							<div class="out-header">
+								<label id="textOutLabel" class="out-label-small"></label>
+								<button class="secondary btn-sm copy-btn-small" id="copyText" ></button>
+							</div>
+							<div class="out-box decoded-text out-box-minimal" id="textOutput" >
+								<span class="placeholder-text" id="placeholderText"></span>
+							</div>
+						</div>
+						<div class="seg no-margin" >
+							<div style="display:flex;justify-content:space-between;align-items:center">
+								<label id="visualLabel" class="out-label-small"></label>
+								<label class="visual-toggle">
+									<input type="checkbox" id="showVisual" style="width:auto">
+									<span id="showVisualLabel"></span>
+								</label>
+							</div>
+							<div class="out-box cells-wrap visual-box" id="visualOutput" ></div>
+						</div>
 					</div>
-				</div>
-				<div id="textSection" class="seg">
-					<div class="out-header">
-						<label id="textOutLabel" style="margin:0"></label>
-						<button class="secondary btn-sm" id="copyText"></button>
-					</div>
-					<div class="out-box decoded-text" id="textOutput">
-						<span class="placeholder-text" id="placeholderText"></span>
-					</div>
-				</div>
-				<div class="seg">
-					<div style="display:flex;justify-content:space-between;align-items:center">
-						<label id="visualLabel" style="margin:0"></label>
-						<label style="font-weight:normal;display:flex;align-items:center;gap:6px;cursor:pointer;margin:0">
-							<input type="checkbox" id="showVisual" style="width:auto">
-							<span id="showVisualLabel"></span>
-						</label>
-					</div>
-					<div class="out-box cells-wrap" id="visualOutput" style="display:none;min-height:72px"></div>
 				</div>
 			</div>
 			<p class="info" style="margin-top:1.5rem;border-top:1px solid var(--border);padding-top:.8rem" id="footNote"></p>
@@ -476,7 +609,6 @@
 					dirBT: 'Braille → Text',
 					dirDots: 'Dot Numbers → Braille / Text',
 					inputLabel: 'Input',
-					convertBtn: 'Convert',
 					clearBtn: 'Clear',
 					unicodeLabel: 'Braille Unicode',
 					dotsLabel: 'Dot Notation',
@@ -504,7 +636,6 @@
 					dirBT: 'Braille → Teks',
 					dirDots: 'Nomor Titik → Braille / Teks',
 					inputLabel: 'Masukan',
-					convertBtn: 'Konversi',
 					clearBtn: 'Hapus',
 					unicodeLabel: 'Braille Unicode',
 					dotsLabel: 'Notasi Titik',
@@ -521,8 +652,13 @@
 					autoTheme: 'Otomatis',
 					lightTheme: 'Terang',
 					darkTheme: 'Gelap',
+					inputPanelTitle: 'Sumber',
+					outputPanelTitle: 'Terjemahan',
 				}
 			};
+
+			text.en.inputPanelTitle = 'Source';
+			text.en.outputPanelTitle = 'Translation';
 
 			const d = (...dots)=>String.fromCharCode(0x2800 + dots.reduce((s,x)=>s + (1 << (x - 1)), 0));
 
@@ -914,10 +1050,13 @@
 				_setup() {
 					el.language.onchange = e=>this._lang(e.target.value);
 					el.theme.onchange = e=>this._theme(e.target.value);
-					el.convertBtn.onclick = ()=>this._convert();
 					el.clearBtn.onclick = ()=>this._clear();
 					el.showVisual.onchange = ()=>this._toggleVisual();
-					el.inputArea.addEventListener('input', ()=>this._updateCaption());
+					el.inputArea.addEventListener('input', ()=>{
+						this._updateCaption();
+						this._convert();
+					});
+					el.swapBtn.onclick = ()=>this._swap();
 					document.querySelectorAll('input[name=dir]').forEach(r=>r.onchange = ()=>this._onDirChange());
 					el.inputArea.addEventListener('keydown', e=>{
 						if (e.key === 'Enter' && e.ctrlKey)
@@ -946,6 +1085,15 @@
 
 				_dir() {
 					return document.querySelector('input[name=dir]:checked')?.value || 'tb';
+				}
+
+				_swap() {
+					const cur = this._dir();
+					if (cur === 'dots') return;
+					const next = cur === 'tb' ? 'bt' : 'tb';
+					document.getElementById('dir' + next.toUpperCase() + 'r').checked = true;
+					this._onDirChange();
+					this._convert();
 				}
 				_script() {
 					return el.script.value;
@@ -1088,6 +1236,7 @@
 							node.textContent = this._s(key);
 					}
 					);
+
 					[...el.theme.options].forEach(opt=>opt.textContent = this._s(opt.value + 'Theme'));
 					['copyUnicode', 'copyDots', 'copyText'].forEach(id=>{
 						const b = document.getElementById(id);
@@ -1099,6 +1248,7 @@
 					this._updateSectionVisibility();
 				}
 			}
+
 
 			new BrailleConverter();
 		</script>
