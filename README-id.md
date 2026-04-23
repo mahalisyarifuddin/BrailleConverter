@@ -27,7 +27,7 @@ Konverter ini bekerja dengan memetakan karakter dari berbagai aksara ke pola Bra
 
 ## Fitur Utama
 
-*   **Dukungan Multi-bahasa**: Mendukung lebih dari 40 bahasa dan aksara, termasuk Inggris, Belanda, Prancis, Jerman, Spanyol, Portugis, Italia, Indonesia, Vietnam, Albania, Irlandia, Wales, Ceko, Hungaria, Polandia, Rumania, Slowakia, Swedia, Denmark, Norwegia, Finlandia, Islandia, Turki, Ukraina, Bulgaria, Belarusia, Rusia, Yunani, Armenia, Georgia, Ibrani, Arab, Persia, Urdu (Pakistan/India), Hindi, Bengali, Punjabi, Gujarati, Odia, Tamil, Telugu, Kannada, dan Malayalam.
+*   **Dukungan Multi-bahasa**: Mendukung lebih dari 50 bahasa dan aksara, termasuk Akan, Amharik, Arab, Azerbaijan, Bengali, Tibet, Katala, Jerman, Dzongkha, Yunani, Inggris, Esperanto, Spanyol, Estonia, Filipino, Faroe, Prancis, Guaraní, Gujarati, Hawaii, Ibrani, Hindi, Indonesia, Igbo, Italia, Inuktitut, Kazakh, Greenland, Khmer, Kannada, Kirgiz, Luksemburg, Lao, Lituania, Latvia, Māori, Malayalam, Mongolia, Malta, Burma, Belanda, Odia, Punjabi, Portugis, Rusia, Sami Utara, Sinhala, Samoa, Albania, Tamil, Telugu, Tatar, Ukraina, Vietnam, dan Zambia.
 *   **Berbagai Mode**: Teks → Braille, Braille → Teks, dan Nomor Titik → Braille/Teks.
 *   **Braille Kelas 1**: Berfokus pada Braille yang tidak disingkat untuk kejelasan dan kepatuhan standar.
 *   **Pratinjau Sel Visual**: Representasi visual opsional dari sel Braille dengan penomoran titik.

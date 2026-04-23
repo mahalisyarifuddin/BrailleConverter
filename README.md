@@ -27,7 +27,7 @@ The converter works by mapping characters from various scripts to their correspo
 
 ## Key Features
 
-*   **Multi-language Support**: Supports over 40 languages and scripts, including English, Dutch, French, German, Spanish, Portuguese, Italian, Indonesian, Vietnamese, Albanian, Irish, Welsh, Czech, Hungarian, Polish, Romanian, Slovak, Swedish, Danish, Norwegian, Finnish, Icelandic, Turkish, Ukrainian, Bulgarian, Belarusian, Russian, Greek, Armenian, Georgian, Hebrew, Arabic, Persian, Urdu (Pakistan/India), Hindi, Bengali, Punjabi, Gujarati, Odia, Tamil, Telugu, Kannada, and Malayalam.
+*   **Multi-language Support**: Supports over 50 languages and scripts, including Akan, Amharic, Arabic, Azerbaijani, Bengali, Tibetan, Catalan, German, Dzongkha, Greek, English, Esperanto, Spanish, Estonian, Filipino, Faroese, French, Guaraní, Gujarati, Hawaiian, Hebrew, Hindi, Indonesian, Igbo, Italian, Inuktitut, Kazakh, Greenlandic, Khmer, Kannada, Kyrgyz, Luxembourgish, Lao, Lithuanian, Latvian, Māori, Malayalam, Mongolian, Maltese, Burmese, Dutch, Odia, Punjabi, Portuguese, Russian, Northern Sami, Sinhala, Samoan, Albanian, Tamil, Telugu, Tatar, Ukrainian, Vietnamese, and Zambian.
 *   **Multiple Modes**: Text → Braille, Braille → Text, and Dot Numbers → Braille/Text.
 *   **Grade 1 Braille**: Focuses on uncontracted Braille for clarity and standard compliance.
 *   **Visual Cell Preview**: Optional visual representation of Braille cells with dot numbering.
