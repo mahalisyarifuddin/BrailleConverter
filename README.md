@@ -47,7 +47,3 @@ Contributions are welcome! Feel free to fork the repository and submit a pull re
 ## Feedback
 
 If you have any feedback or suggestions, please reach out via the Issues section of the repository.
-
-## About
-
-Convert text to Braille and vice versa.

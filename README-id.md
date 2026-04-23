@@ -47,7 +47,3 @@ Kontribusi sangat diterima! Jangan ragu untuk melakukan fork pada repositori ini
 ## Umpan Balik
 
 Jika Anda memiliki umpan balik atau saran, silakan hubungi melalui bagian Issues di repositori ini.
-
-## Tentang
-
-Konversi teks ke Braille dan sebaliknya.
