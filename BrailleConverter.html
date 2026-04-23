@@ -1,1256 +1,840 @@
 <!DOCTYPE html>
 <html lang="en">
-	<head>
-		<meta charset="UTF-8">
-		<meta name="viewport" content="width=device-width,initial-scale=1">
-		<title>Braille Converter</title>
-		<style>
-			:root {
-				--primary: #005dac;
-				--on-primary: #ffffff;
-				--hover: #00539a;
-				--background: #f9f9ff;
-				--surface: #ffffff;
-				--text: #181c21;
-				--border: #c1c6d4;
-				--muted: #f2f3fc;
-				--success: #0b6b1d;
-				--on-success: #ffffff;
-				--danger: #ba1a1a;
-				--on-danger: #ffffff;
-				--highlight-bg: #d4e3ff;
-			}
-
-			@media (prefers-color-scheme: dark) {
-				:root:not(.light) {
-					--primary: #a5c8ff;
-					--on-primary: #00315f;
-					--hover: #72adff;
-					--background: #101319;
-					--surface: #0b0e14;
-					--text: #e0e2ea;
-					--border: #414752;
-					--muted: #181c21;
-					--success: #82db7e;
-					--on-success: #00390a;
-					--danger: #ffb4ab;
-					--on-danger: #93000a;
-					--highlight-bg: #001c3a;
-				}
-			}
-
-			:root.dark {
-				--primary: #a5c8ff;
-				--on-primary: #00315f;
-				--hover: #72adff;
-				--background: #101319;
-				--surface: #0b0e14;
-				--text: #e0e2ea;
-				--border: #414752;
-				--muted: #181c21;
-				--success: #82db7e;
-				--on-success: #00390a;
-				--danger: #ffb4ab;
-				--on-danger: #93000a;
-				--highlight-bg: #001c3a;
-			}
-
-			* {
-				box-sizing: border-box;
-				margin: 0;
-				padding: 0;
-				outline-offset: 2px;
-			}
-
-			*:focus-visible {
-				outline: 2px solid var(--primary);
-			}
-
-			body {
-				background: var(--background);
-				color: var(--text);
-				font-family: sans-serif;
-				display: flex;
-				justify-content: center;
-				min-height: 100vh;
-				padding: 1rem;
-			}
-
-			.container {
-				background: var(--surface);
-				border: 1px solid var(--border);
-				border-radius: 8px;
-				max-width: 1100px;
-				padding: 2rem;
-				width: 100%;
-				position: relative;
-				margin: 2rem 0;
-			}
-
-			.main-layout {
-				display: grid;
-				grid-template-columns: 1fr 1fr;
-				gap: 1.5rem;
-				margin-top: 1.5rem;
-			}
-
-			.panel {
-				display: flex;
-				flex-direction: column;
-				gap: 1rem;
-				padding: 1.2rem;
-				border: 1px solid var(--border);
-				border-radius: 8px;
-				background: var(--surface);
-			}
-
-			.output-panel {
-				background: var(--muted);
-			}
-
-			.panel-header {
-				display: flex;
-				justify-content: space-between;
-				align-items: center;
-				border-bottom: 1px solid var(--border);
-				padding-bottom: .6rem;
-				margin-bottom: .4rem;
-			}
-
-			.panel-title {
-				font-weight: 700;
-				font-size: .9rem;
-				text-transform: uppercase;
-				color: var(--primary);
-			}
-
-			.swap-btn {
-				background: none;
-				border: 1px solid var(--border);
-				border-radius: 50%;
-				width: 36px;
-				height: 36px;
-				display: flex;
-				align-items: center;
-				justify-content: center;
-				cursor: pointer;
-				transition: background .2s;
-				padding: 0;
-			}
-
-			.swap-btn:hover {
-				background: var(--muted);
-			}
-
-			.swap-btn svg {
-				width: 20px;
-				height: 20px;
-				fill: var(--text);
-			}
-
-
-			.clear-btn-small {
-				width: auto;
-				padding: .2rem .6rem;
-			}
-			.main-textarea {
-				border: 0;
-				padding: 0;
-				min-height: 150px;
-				outline: none;
-				box-shadow: none;
-			}
-			.convert-btn-large {
-				padding: .45rem 1.4rem;
-				font-size: 1rem;
-			}
-			.no-margin {
-				margin: 0;
-			}
-			.mt-auto {
-				margin-top: auto;
-			}
-			.out-label-small {
-				margin: 0;
-				font-size: .85rem;
-				opacity: .8;
-			}
-			.copy-btn-small {
-				padding: .2rem .5rem;
-				font-size: .75rem;
-			}
-			.out-box-minimal {
-				background: transparent;
-				border: 0;
-				padding: .5rem 0;
-				min-height: 30px;
-			}
-			.visual-toggle {
-				font-weight: normal;
-				display: flex;
-				align-items: center;
-				gap: 6px;
-				cursor: pointer;
-				margin: 0;
-				font-size: .75rem;
-			}
-			.visual-box {
-				display: none;
-				min-height: 72px;
-				background: var(--surface);
-				margin-top: .5rem;
-			}
-
-			.hidden {
-				display: none !important;
-			}
-
-			h1, h2, h3 {
-				margin: .5rem 0;
-			}
-
-			label {
-				display: block;
-				font-weight: 700;
-				margin: .4rem 0 .2rem;
-			}
-
-			input, select, button, textarea {
-				background: var(--surface);
-				border: 1px solid var(--border);
-				border-radius: 4px;
-				color: var(--text);
-				font-size: 1rem;
-				padding: .5rem;
-				width: 100%;
-			}
-
-			textarea {
-				resize: vertical;
-				min-height: 80px;
-			}
-
-			button {
-				cursor: pointer;
-			}
-
-			button:disabled {
-				opacity: .6;
-				cursor: not-allowed;
-			}
-
-			.primary {
-				background: var(--primary);
-				color: var(--on-primary);
-				border: 0;
-			}
-
-			.primary:hover:not(:disabled) {
-				background: var(--hover);
-			}
-
-			.secondary:hover:not(:disabled) {
-				background: var(--muted);
-			}
-
-			.danger {
-				background: var(--danger);
-				color: var(--on-danger);
-				border: 0;
-			}
-
-			.success {
-				background: var(--success);
-				color: var(--on-success);
-				border: 0;
-			}
-
-			.selectors {
-				position: absolute;
-				right: 2rem;
-				top: 1rem;
-				display: flex;
-				gap: 8px;
-			}
-
-			.selectors select {
-				width: auto;
-				font-size: .9rem;
-			}
-
-			.row {
-				display: flex;
-				gap: 1rem;
-				margin-bottom: 1rem;
-			}
-
-			.group {
-				flex: 1;
-			}
-
-			.error {
-				color: var(--danger);
-				font-size: .9rem;
-				margin: 1rem 0;
-				display: block;
-				font-weight: 500;
-			}
-
-			.info {
-				font-size: .9rem;
-				opacity: .8;
-				line-height: 1.6;
-			}
-
-			@media(max-width: 768px) {
-				.selectors {
-					position: static;
-					justify-content: end;
-					margin-bottom: .5rem;
-				}
-
-				.row {
-					flex-direction: column;
-				}
-
-				.main-layout {
-					grid-template-columns: 1fr;
-				}
-			}
-
-			.seg {
-				margin: 1.2rem 0 0;
-			}
-
-			.inline-label {
-				font-weight: 700;
-				display: inline;
-				margin: 0;
-			}
-
-			.option-row {
-				display: flex;
-				gap: 12px;
-				flex-wrap: wrap;
-				align-items: center;
-				margin: .6rem 0;
-			}
-
-			.radio-wrap {
-				display: flex;
-				gap: 4px;
-				align-items: center;
-			}
-
-			.radio-wrap input[type=radio] {
-				width: auto;
-				cursor: pointer;
-			}
-
-			.radio-wrap label {
-				font-weight: normal;
-				margin: 0;
-				cursor: pointer;
-			}
-
-			.tag {
-				font-size: .75rem;
-				padding: .15rem .5rem;
-				border-radius: 12px;
-				background: var(--highlight-bg);
-				color: var(--primary);
-				font-weight: 700;
-				white-space: nowrap;
-			}
-
-			.btn-sm {
-				width: auto;
-				padding: .3rem .9rem;
-				font-size: .85rem;
-			}
-
-			.btn-row {
-				display: flex;
-				gap: 8px;
-				margin-top: .7rem;
-				align-items: center;
-			}
-
-			.caption {
-				font-size: .8rem;
-				opacity: .7;
-				margin-top: .25rem;
-				line-height: 1.5;
-			}
-
-			.out-header {
-				display: flex;
-				justify-content: space-between;
-				align-items: center;
-				margin-bottom: .3rem;
-			}
-
-			.out-box {
-				background: var(--muted);
-				border: 1px solid var(--border);
-				border-radius: 4px;
-				padding: .8rem 1rem;
-				min-height: 54px;
-				word-break: break-all;
-			}
-
-			.braille-unicode {
-				font-size: 1.9rem;
-				letter-spacing: 5px;
-				line-height: 2.2;
-			}
-
-			.dots-mono {
-				font-family: monospace;
-				font-size: .9rem;
-				line-height: 1.8;
-			}
-
-			.decoded-text {
-				font-size: 1.1rem;
-				line-height: 1.8;
-			}
-
-			.placeholder-text {
-				opacity: .45;
-				font-style: italic;
-				font-size: .9rem;
-			}
-
-			.cells-wrap {
-				display: flex;
-				flex-wrap: wrap;
-				gap: 7px;
-				padding: .8rem;
-				align-items: flex-end;
-			}
-
-			.cell-item {
-				display: flex;
-				flex-direction: column;
-				align-items: center;
-				gap: 2px;
-			}
-
-			.cell-grid {
-				display: grid;
-				grid-template-columns: 1fr 1fr;
-				grid-template-rows: 1fr 1fr 1fr;
-				gap: 3px;
-				background: var(--surface);
-				border: 1px solid var(--border);
-				border-radius: 3px;
-				padding: 4px;
-			}
-
-			.cdot {
-				width: 9px;
-				height: 9px;
-				border-radius: 50%;
-				background: var(--border);
-			}
-
-			.cdot.on {
-				background: var(--primary);
-			}
-
-			.cell-lbl {
-				font-size: .62rem;
-				opacity: .75;
-				max-width: 30px;
-				text-align: center;
-				overflow: hidden;
-				white-space: nowrap;
-				line-height: 1.3;
-			}
-
-			.cell-spacer {
-				width: 10px;
-			}
-
-			.divider {
-				border: 0;
-				border-top: 1px solid var(--border);
-				margin: 1.2rem 0 .8rem;
-			}
-
-			select#script {
-				width: auto;
-				min-width: 200px;
-			}
-		</style>
-	</head>
-	<body>
-		<div class="container">
-			<div class="selectors">
-				<select id="language">
-					<option value="en">English</option>
-					<option value="id">Bahasa Indonesia</option>
-				</select>
-				<select id="theme">
-					<option value="auto">Auto</option>
-					<option value="light">Light</option>
-					<option value="dark">Dark</option>
-				</select>
-			</div>
-			<h1 id="title"></h1>
-			<p id="subtitle" class="info" style="margin-top:.25rem"></p>
-			<div class="seg">
-				<div class="option-row">
-					<label class="inline-label" id="scriptLabel" for="script"></label>
-					<select id="script">
-						<option value="en">English</option>
-						<option value="fr">Français (French)</option>
-						<option value="de">Deutsch (German)</option>
-						<option value="es">Español (Spanish)</option>
-						<option value="pt">Português (Portuguese)</option>
-						<option value="it">Italiano (Italian)</option>
-						<option value="id2">Indonesian / Malay</option>
-						<option value="ru">Русский (Russian)</option>
-					</select>
-					<span class="tag" id="gradeTag"></span>
-				</div>
-				<div class="option-row" style="margin-top:.5rem">
-					<label class="inline-label" id="dirLabel"></label>
-					<div class="radio-wrap">
-						<input type="radio" name="dir" id="dirTBr" value="tb" checked>
-						<label for="dirTBr" id="dirTB"></label>
-					</div>
-					<button class="swap-btn" id="swapBtn" type="button" title="Swap languages">
-						<svg viewBox="0 0 24 24"><path d="M6.99 11L3 15l3.99 4v-3H14v-2H6.99v-3zM21 9l-3.99-4v3H10v2h7.01v3L21 9z"/></svg>
-					</button>
-					<div class="radio-wrap">
-						<input type="radio" name="dir" id="dirBTr" value="bt">
-						<label for="dirBTr" id="dirBT"></label>
-					</div>
-					<div class="radio-wrap">
-						<input type="radio" name="dir" id="dirDr" value="dots">
-						<label for="dirDr" id="dirDots"></label>
-					</div>
-				</div>
-			</div>
-
-			<div class="main-layout">
-				<div class="panel input-panel">
-					<div class="panel-header">
-						<span class="panel-title" id="inputPanelTitle"></span>
-					</div>
-					<div class="seg no-margin" >
-						<label id="inputLabel" for="inputArea" class="hidden"></label>
-						<textarea id="inputArea" rows="8" spellcheck="false" class="main-textarea"></textarea>
-						<div id="inputCaption" class="caption"></div>
-					</div>
-					<div class="btn-row mt-auto" >
-						<button class="secondary btn-sm convert-btn-large" id="clearBtn"></button>
-					</div>
-				</div>
-
-				<div class="panel output-panel">
-					<div class="panel-header">
-						<span class="panel-title" id="outputPanelTitle"></span>
-					</div>
-					<div id="outputSection" class="no-margin" style="display:flex;flex-direction:column;gap:1rem">
-						<div id="unicodeSection" class="seg no-margin" >
-							<div class="out-header">
-								<label id="unicodeLabel" class="out-label-small"></label>
-								<button class="secondary btn-sm copy-btn-small" id="copyUnicode" ></button>
-							</div>
-							<div class="out-box braille-unicode out-box-minimal" id="unicodeOutput" >
-								<span class="placeholder-text" id="placeholderUni"></span>
-							</div>
-						</div>
-						<div id="dotsSection" class="seg no-margin" >
-							<div class="out-header">
-								<label id="dotsLabel" class="out-label-small"></label>
-								<button class="secondary btn-sm copy-btn-small" id="copyDots" ></button>
-							</div>
-							<div class="out-box dots-mono out-box-minimal" id="dotsOutput" >
-								<span class="placeholder-text" id="placeholderDots"></span>
-							</div>
-						</div>
-						<div id="textSection" class="seg no-margin" >
-							<div class="out-header">
-								<label id="textOutLabel" class="out-label-small"></label>
-								<button class="secondary btn-sm copy-btn-small" id="copyText" ></button>
-							</div>
-							<div class="out-box decoded-text out-box-minimal" id="textOutput" >
-								<span class="placeholder-text" id="placeholderText"></span>
-							</div>
-						</div>
-						<div class="seg no-margin" >
-							<div style="display:flex;justify-content:space-between;align-items:center">
-								<label id="visualLabel" class="out-label-small"></label>
-								<label class="visual-toggle">
-									<input type="checkbox" id="showVisual" style="width:auto">
-									<span id="showVisualLabel"></span>
-								</label>
-							</div>
-							<div class="out-box cells-wrap visual-box" id="visualOutput" ></div>
-						</div>
-					</div>
-				</div>
-			</div>
-			<p class="info" style="margin-top:1.5rem;border-top:1px solid var(--border);padding-top:.8rem" id="footNote"></p>
-		</div>
-		<script>
-			const text = {
-				en: {
-					title: 'Braille Converter',
-					subtitle: 'Convert text to Braille (Unicode or dot notation) and vice versa. Supports English, French, German, Spanish, Portuguese, Italian, Indonesian, and Russian.',
-					scriptLabel: 'Script:',
-					gradeTag: 'Grade 1 · Uncontracted',
-					dirLabel: 'Mode:',
-					dirTB: 'Text → Braille',
-					dirBT: 'Braille → Text',
-					dirDots: 'Dot Numbers → Braille / Text',
-					inputLabel: 'Input',
-					clearBtn: 'Clear',
-					unicodeLabel: 'Braille Unicode',
-					dotsLabel: 'Dot Notation',
-					textOutLabel: 'Decoded Text',
-					visualLabel: 'Visual Cells',
-					showVisualLabel: 'Show visual cells',
-					copyBtn: 'Copy',
-					copiedBtn: 'Copied ✓',
-					placeholder: '—',
-					footNote: 'Grade 1 (uncontracted) braille only. Capitals are prefixed with the capital sign ⠠ (dot 6). Numbers are prefixed with the number sign ⠼ (dots 3-4-5-6). Dot notation format: space-separated cells, each cell listed as its raised dot numbers (e.g. 125 for ⠓ h); use 0 for a blank/space cell. Russian uses phonetic-correspondence mapping per the international standard (в→⠺, ц→⠉, ч→⠟, щ→⠭).',
-					captionTB: 'Enter plain text. Capitals are handled automatically.',
-					captionBT: 'Paste Braille Unicode characters (e.g. ⠓⠑⠇⠇⠕).',
-					captionDots: 'Enter space-separated dot cells. Use digit strings per cell (e.g. "125 15 123 123 135"), and 0 for blank. Optionally prefix cap sign: "6 125 = ⠠H".',
-					autoTheme: 'Auto',
-					lightTheme: 'Light',
-					darkTheme: 'Dark',
-				},
-				id: {
-					title: 'Konverter Braille',
-					subtitle: 'Konversi teks ke Braille (Unicode atau notasi titik) dan sebaliknya. Mendukung Inggris, Prancis, Jerman, Spanyol, Portugis, Italia, Indonesia, dan Rusia.',
-					scriptLabel: 'Aksara:',
-					gradeTag: 'Kelas 1 · Tidak Disingkat',
-					dirLabel: 'Mode:',
-					dirTB: 'Teks → Braille',
-					dirBT: 'Braille → Teks',
-					dirDots: 'Nomor Titik → Braille / Teks',
-					inputLabel: 'Masukan',
-					clearBtn: 'Hapus',
-					unicodeLabel: 'Braille Unicode',
-					dotsLabel: 'Notasi Titik',
-					textOutLabel: 'Teks Terdekode',
-					visualLabel: 'Sel Visual',
-					showVisualLabel: 'Tampilkan sel visual',
-					copyBtn: 'Salin',
-					copiedBtn: 'Disalin ✓',
-					placeholder: '—',
-					footNote: 'Hanya braille kelas 1 (tidak disingkat). Huruf kapital diawali tanda kapital ⠠ (titik 6). Angka diawali tanda angka ⠼ (titik 3-4-5-6). Format notasi titik: sel dipisah spasi, tiap sel adalah string angka titik yang raised (mis. 125 untuk ⠓ h); gunakan 0 untuk sel kosong/spasi. Bahasa Rusia menggunakan pemetaan korespondensi fonetik.',
-					captionTB: 'Masukkan teks biasa. Huruf kapital ditangani otomatis.',
-					captionBT: 'Tempel karakter Braille Unicode (mis. ⠓⠑⠇⠇⠕).',
-					captionDots: 'Masukkan sel titik dipisah spasi. Gunakan string digit per sel (mis. "125 15 123 123 135"), dan 0 untuk kosong.',
-					autoTheme: 'Otomatis',
-					lightTheme: 'Terang',
-					darkTheme: 'Gelap',
-					inputPanelTitle: 'Sumber',
-					outputPanelTitle: 'Terjemahan',
-				}
-			};
-
-			text.en.inputPanelTitle = 'Source';
-			text.en.outputPanelTitle = 'Translation';
-
-			const d = (...dots)=>String.fromCharCode(0x2800 + dots.reduce((s,x)=>s + (1 << (x - 1)), 0));
-
-			const BLANK = '\u2800';
-			const NUM_SIGN = d(3, 4, 5, 6);
-			const CAP_SIGN = d(6);
-
-			function charToDots(ch) {
-				const n = ch.charCodeAt(0) - 0x2800;
-				if (n < 0 || n > 63)
-					return [];
-				return [1, 2, 3, 4, 5, 6].filter(b=>n & (1 << (b - 1)));
-			}
-
-			const BASE = {
-				a: d(1),
-				b: d(1, 2),
-				c: d(1, 4),
-				d: d(1, 4, 5),
-				e: d(1, 5),
-				f: d(1, 2, 4),
-				g: d(1, 2, 4, 5),
-				h: d(1, 2, 5),
-				i: d(2, 4),
-				j: d(2, 4, 5),
-				k: d(1, 3),
-				l: d(1, 2, 3),
-				m: d(1, 3, 4),
-				n: d(1, 3, 4, 5),
-				o: d(1, 3, 5),
-				p: d(1, 2, 3, 4),
-				q: d(1, 2, 3, 4, 5),
-				r: d(1, 2, 3, 5),
-				s: d(2, 3, 4),
-				t: d(2, 3, 4, 5),
-				u: d(1, 3, 6),
-				v: d(1, 2, 3, 6),
-				w: d(2, 4, 5, 6),
-				x: d(1, 3, 4, 6),
-				y: d(1, 3, 4, 5, 6),
-				z: d(1, 3, 5, 6)
-			};
-
-			const DIGITS = {
-				'1': d(1),
-				'2': d(1, 2),
-				'3': d(1, 4),
-				'4': d(1, 4, 5),
-				'5': d(1, 5),
-				'6': d(1, 2, 4),
-				'7': d(1, 2, 4, 5),
-				'8': d(1, 2, 5),
-				'9': d(2, 4),
-				'0': d(2, 4, 5)
-			};
-
-			const PUNCT = {
-				',': d(2),
-				';': d(2, 3),
-				':': d(2, 5),
-				'.': d(2, 5, 6),
-				'!': d(2, 3, 5),
-				'?': d(2, 3, 6),
-				"'": d(3),
-				'-': d(3, 6),
-				'(': d(1, 2, 3, 5, 6),
-				')': d(2, 3, 4, 5, 6),
-				'"': d(2, 3, 5, 6),
-				'«': d(2, 3, 5, 6),
-				'»': d(2, 3, 5, 6)
-			};
-
-			const SCRIPTS = {
-				en: {
-					name: 'English',
-					letters: {
-						...BASE
-					}
-				},
-				id2: {
-					name: 'Indonesian / Malay',
-					letters: {
-						...BASE
-					}
-				},
-				fr: {
-					name: 'Français',
-					letters: {
-						...BASE,
-						'à': d(1, 2, 3, 5, 6),
-						'â': d(1, 6),
-						'ç': d(1, 2, 3, 4, 6),
-						'è': d(2, 3, 4, 6),
-						'é': d(1, 2, 3, 4, 5, 6),
-						'ê': d(1, 2, 6),
-						'ë': d(1, 2, 4, 6),
-						'î': d(1, 4, 6),
-						'ï': d(1, 2, 4, 5, 6),
-						'ô': d(1, 4, 5, 6),
-						'ù': d(2, 3, 4, 5, 6),
-						'û': d(1, 5, 6),
-						'ü': d(1, 2, 5, 6),
-						'œ': d(2, 4, 6),
-						'æ': d(3, 4, 5),
-					}
-				},
-				de: {
-					name: 'Deutsch',
-					letters: {
-						...BASE,
-						'ä': d(3, 4, 5),
-						'ö': d(2, 4, 6),
-						'ü': d(1, 2, 5, 6),
-						'ß': d(2, 3)
-					}
-				},
-				es: {
-					name: 'Español',
-					letters: {
-						...BASE,
-						'á': d(1, 2, 3, 5, 6),
-						'é': d(1, 2, 3, 4, 5, 6),
-						'í': d(3, 4),
-						'ó': d(3, 4, 6),
-						'ú': d(2, 3, 4),
-						'ü': d(1, 2, 5, 6),
-						'ñ': d(1, 2, 4, 5, 6)
-					}
-				},
-				pt: {
-					name: 'Português',
-					letters: {
-						...BASE,
-						'á': d(1, 2, 3, 5, 6),
-						'â': d(1, 6),
-						'ã': d(3, 4, 5),
-						'à': d(1, 2, 3, 5, 6),
-						'ç': d(1, 2, 3, 4, 6),
-						'é': d(1, 2, 3, 4, 5, 6),
-						'ê': d(1, 2, 6),
-						'í': d(3, 4),
-						'ó': d(3, 4, 6),
-						'ô': d(1, 4, 5, 6),
-						'õ': d(2, 4, 6),
-						'ú': d(2, 3, 4)
-					}
-				},
-				it: {
-					name: 'Italiano',
-					letters: {
-						...BASE,
-						'à': d(1, 2, 3, 5, 6),
-						'è': d(2, 3, 4, 6),
-						'é': d(1, 2, 3, 4, 5, 6),
-						'ì': d(3, 4),
-						'î': d(1, 4, 6),
-						'ò': d(3, 4, 6),
-						'ó': d(1, 3, 4, 6),
-						'ù': d(2, 3, 4, 5, 6),
-						'û': d(1, 5, 6)
-					}
-				},
-				ru: {
-					name: 'Русский',
-					letters: {
-						'а': d(1),
-						'б': d(1, 2),
-						'в': d(2, 4, 5, 6),
-						'г': d(1, 2, 4, 5),
-						'д': d(1, 4, 5),
-						'е': d(1, 5),
-						'ё': d(1, 6),
-						'ж': d(2, 4, 5),
-						'з': d(1, 3, 5, 6),
-						'и': d(2, 4),
-						'й': d(1, 2, 3, 4, 6),
-						'к': d(1, 3),
-						'л': d(1, 2, 3),
-						'м': d(1, 3, 4),
-						'н': d(1, 3, 4, 5),
-						'о': d(1, 3, 5),
-						'п': d(1, 2, 3, 4),
-						'р': d(1, 2, 3, 5),
-						'с': d(2, 3, 4),
-						'т': d(2, 3, 4, 5),
-						'у': d(1, 3, 6),
-						'ф': d(1, 2, 4),
-						'х': d(1, 2, 5),
-						'ц': d(1, 4),
-						'ч': d(1, 2, 3, 4, 5),
-						'ш': d(1, 5, 6),
-						'щ': d(1, 3, 4, 6),
-						'ъ': d(1, 2, 3, 5, 6),
-						'ы': d(2, 3, 4, 6),
-						'ь': d(2, 3, 4, 5, 6),
-						'э': d(2, 4, 6),
-						'ю': d(1, 2, 5, 6),
-						'я': d(1, 2, 4, 6)
-					}
-				}
-			};
-
-			function buildRevMap(scriptKey) {
-				const letters = (SCRIPTS[scriptKey] || SCRIPTS.en).letters;
-				const revLetters = {}
-				  , revDigits = {}
-				  , revPunct = {};
-				for (const [k,v] of Object.entries(letters))
-					revLetters[v] = k;
-				for (const [k,v] of Object.entries(DIGITS))
-					revDigits[v] = k;
-				for (const [k,v] of Object.entries(PUNCT))
-					revPunct[v] = k;
-				return {
-					revLetters,
-					revDigits,
-					revPunct
-				};
-			}
-
-			function textToBraille(text, scriptKey) {
-				const letters = (SCRIPTS[scriptKey] || SCRIPTS.en).letters;
-				const cells = [];
-				let inNum = false;
-
-				for (const ch of text) {
-					if (ch === '\n' || ch === '\r') {
-						inNum = false;
-						cells.push({
-							braille: BLANK,
-							source: '↵',
-							isSpace: true
-						});
-						continue;
-					}
-					if (ch === ' ' || ch === '\t') {
-						inNum = false;
-						cells.push({
-							braille: BLANK,
-							source: ' ',
-							isSpace: true
-						});
-						continue;
-					}
-
-					if (/[0-9]/.test(ch)) {
-						if (!inNum) {
-							cells.push({
-								braille: NUM_SIGN,
-								source: '⠼',
-								isPrefix: true
-							});
-							inNum = true;
-						}
-						cells.push({
-							braille: DIGITS[ch],
-							source: ch
-						});
-						continue;
-					}
-					inNum = false;
-
-					const isUpper = (ch >= 'A' && ch <= 'Z') || (ch >= '\u0410' && ch <= '\u042F') || ch === '\u0401';
-					const lower = ch.toLowerCase();
-
-					if (letters[lower]) {
-						if (isUpper)
-							cells.push({
-								braille: CAP_SIGN,
-								source: '⠠',
-								isPrefix: true
-							});
-						cells.push({
-							braille: letters[lower],
-							source: lower
-						});
-						continue;
-					}
-					if (PUNCT[ch]) {
-						cells.push({
-							braille: PUNCT[ch],
-							source: ch
-						});
-						continue;
-					}
-				}
-				return cells;
-			}
-
-			function brailleToText(input, scriptKey) {
-				const {revLetters, revDigits, revPunct} = buildRevMap(scriptKey);
-				let result = '';
-				let capNext = false
-				  , inNum = false;
-
-				for (const ch of input) {
-					if (ch === ' ' || ch === BLANK) {
-						result += ' ';
-						inNum = false;
-						continue;
-					}
-					if (ch === CAP_SIGN) {
-						capNext = true;
-						continue;
-					}
-					if (ch === NUM_SIGN) {
-						inNum = true;
-						continue;
-					}
-
-					if (inNum) {
-						const digit = revDigits[ch];
-						if (digit !== undefined) {
-							result += digit;
-							continue;
-						}
-						inNum = false;
-					}
-
-					const letter = revLetters[ch];
-					if (letter !== undefined) {
-						result += capNext ? letter.toUpperCase() : letter;
-						capNext = false;
-						continue;
-					}
-					const punct = revPunct[ch];
-					if (punct !== undefined) {
-						result += punct;
-						capNext = false;
-						continue;
-					}
-
-					result += '?';
-					capNext = false;
-				}
-				return result;
-			}
-
-			function dotsToBraille(input) {
-				const cells = [];
-				const tokens = input.trim().split(/\s+/);
-				for (let t = 0; t < tokens.length; t++) {
-					const tok = tokens[t];
-					if (!tok)
-						continue;
-					if (tok === '0' || tok === '_') {
-						cells.push({
-							braille: BLANK,
-							source: '⎵',
-							isSpace: true
-						});
-						continue;
-					}
-					const dotNums = [...tok].map(Number).filter(n=>n >= 1 && n <= 6);
-					const unique = [...new Set(dotNums)].sort((a,b)=>a - b);
-					const bChar = unique.length ? String.fromCharCode(0x2800 + unique.reduce((s,x)=>s + (1 << (x - 1)), 0)) : BLANK;
-					cells.push({
-						braille: bChar,
-						source: unique.join('') || '?'
-					});
-				}
-				return cells;
-			}
-
-			const cellsToUnicode = cells=>cells.map(c=>c.braille).join('');
-
-			function cellsToDotsStr(cells) {
-				return cells.map(c=>{
-					if (c.isSpace)
-						return '0';
-					const dots = charToDots(c.braille);
-					return dots.length ? dots.join('') : '0';
-				}
-				).join(' ');
-			}
-
-			const el = new Proxy({},{
-				get: (_,id)=>document.getElementById(id)
-			});
-
-			class BrailleConverter {
-				constructor() {
-					this.uiLang = navigator.language?.startsWith('id') ? 'id' : 'en';
-					this._setup();
-					this._theme('auto');
-					this._lang(this.uiLang);
-				}
-
-				_setup() {
-					el.language.onchange = e=>this._lang(e.target.value);
-					el.theme.onchange = e=>this._theme(e.target.value);
-					el.clearBtn.onclick = ()=>this._clear();
-					el.showVisual.onchange = ()=>this._toggleVisual();
-					el.inputArea.addEventListener('input', ()=>{
-						this._updateCaption();
-						this._convert();
-					});
-					el.swapBtn.onclick = ()=>this._swap();
-					document.querySelectorAll('input[name=dir]').forEach(r=>r.onchange = ()=>this._onDirChange());
-					el.inputArea.addEventListener('keydown', e=>{
-						if (e.key === 'Enter' && e.ctrlKey)
-							this._convert();
-					}
-					);
-
-					this._setupCopy('copyUnicode', 'unicodeOutput');
-					this._setupCopy('copyDots', 'dotsOutput');
-					this._setupCopy('copyText', 'textOutput');
-				}
-
-				_setupCopy(btnId, srcId) {
-					document.getElementById(btnId).onclick = ()=>{
-						const content = document.getElementById(srcId).textContent;
-						navigator.clipboard?.writeText(content).then(()=>{
-							const btn = document.getElementById(btnId);
-							const orig = btn.textContent;
-							btn.textContent = this._s('copiedBtn');
-							setTimeout(()=>btn.textContent = orig, 1600);
-						}
-						);
-					}
-					;
-				}
-
-				_dir() {
-					return document.querySelector('input[name=dir]:checked')?.value || 'tb';
-				}
-
-				_swap() {
-					const cur = this._dir();
-					if (cur === 'dots') return;
-					const next = cur === 'tb' ? 'bt' : 'tb';
-					document.getElementById('dir' + next.toUpperCase() + 'r').checked = true;
-					this._onDirChange();
-					this._convert();
-				}
-				_script() {
-					return el.script.value;
-				}
-				_s(key) {
-					return text[this.uiLang]?.[key] ?? text.en[key] ?? key;
-				}
-
-				_convert() {
-					const dir = this._dir();
-					const script = this._script();
-					const input = el.inputArea.value;
-
-					el.unicodeOutput.textContent = '';
-					el.dotsOutput.textContent = '';
-					el.textOutput.textContent = '';
-					el.visualOutput.innerHTML = '';
-
-					let cells = [];
-
-					if (dir === 'tb') {
-						cells = textToBraille(input, script);
-						const uni = cellsToUnicode(cells);
-						const dots = cellsToDotsStr(cells);
-						el.unicodeOutput.textContent = uni || this._s('placeholder');
-						el.dotsOutput.textContent = dots || this._s('placeholder');
-						el.unicodeSection.style.display = '';
-						el.dotsSection.style.display = '';
-						el.textSection.style.display = 'none';
-
-					} else if (dir === 'bt') {
-						for (const ch of input) {
-							if (ch === ' ')
-								cells.push({
-									braille: BLANK,
-									source: ' ',
-									isSpace: true
-								});
-							else if (ch >= '\u2800' && ch <= '\u28FF')
-								cells.push({
-									braille: ch,
-									source: ch
-								});
-						}
-						const decoded = brailleToText(input, script);
-						el.textOutput.textContent = decoded || this._s('placeholder');
-						el.unicodeSection.style.display = 'none';
-						el.dotsSection.style.display = 'none';
-						el.textSection.style.display = '';
-
-					} else {
-						cells = dotsToBraille(input);
-						const uni = cellsToUnicode(cells);
-						const decoded = brailleToText(uni, script);
-						el.unicodeOutput.textContent = uni || this._s('placeholder');
-						el.textOutput.textContent = decoded || this._s('placeholder');
-						el.unicodeSection.style.display = '';
-						el.dotsSection.style.display = 'none';
-						el.textSection.style.display = '';
-					}
-
-					if (el.showVisual.checked)
-						this._renderCells(cells);
-				}
-
-				_renderCells(cells) {
-					const wrap = el.visualOutput;
-					wrap.innerHTML = '';
-					for (const cell of cells) {
-						if (cell.isSpace) {
-							const sp = document.createElement('div');
-							sp.className = 'cell-spacer';
-							wrap.appendChild(sp);
-							continue;
-						}
-						const dots = charToDots(cell.braille);
-						const item = document.createElement('div');
-						item.className = 'cell-item';
-						item.title = `dots: ${dots.length ? dots.join('-') : '(blank)'}\n${cell.source}`;
-
-						const grid = document.createElement('div');
-						grid.className = 'cell-grid';
-						for (const pos of [1, 4, 2, 5, 3, 6]) {
-							const dot = document.createElement('div');
-							dot.className = 'cdot' + (dots.includes(pos) ? ' on' : '');
-							grid.appendChild(dot);
-						}
-
-						const lbl = document.createElement('div');
-						lbl.className = 'cell-lbl';
-						lbl.textContent = cell.source || '';
-
-						item.appendChild(grid);
-						item.appendChild(lbl);
-						wrap.appendChild(item);
-					}
-				}
-
-				_toggleVisual() {
-					el.visualOutput.style.display = el.showVisual.checked ? 'flex' : 'none';
-				}
-
-				_clear() {
-					el.inputArea.value = '';
-					el.unicodeOutput.textContent = '';
-					el.dotsOutput.textContent = '';
-					el.textOutput.textContent = '';
-					el.visualOutput.innerHTML = '';
-				}
-
-				_onDirChange() {
-					this._updateCaption();
-					this._updateSectionVisibility();
-				}
-
-				_updateSectionVisibility() {
-					const dir = this._dir();
-					el.unicodeSection.style.display = (dir === 'bt') ? 'none' : '';
-					el.dotsSection.style.display = (dir === 'bt' || dir === 'dots') ? 'none' : '';
-					el.textSection.style.display = (dir === 'tb') ? 'none' : '';
-				}
-
-				_updateCaption() {
-					const dir = this._dir();
-					el.inputCaption.textContent = this._s('caption' + dir.toUpperCase().replace('DOTS', 'Dots').replace('TB', 'TB').replace('BT', 'BT'));
-					const key = dir === 'tb' ? 'captionTB' : dir === 'bt' ? 'captionBT' : 'captionDots';
-					el.inputCaption.textContent = this._s(key);
-				}
-
-				_theme(t) {
-					document.documentElement.className = t === 'auto' ? '' : t;
-					el.theme.value = t;
-				}
-
-				_lang(lang) {
-					this.uiLang = el.language.value = document.documentElement.lang = lang;
-					Object.keys(text.en).forEach(key=>{
-						const node = document.getElementById(key);
-						if (node)
-							node.textContent = this._s(key);
-					}
-					);
-
-					[...el.theme.options].forEach(opt=>opt.textContent = this._s(opt.value + 'Theme'));
-					['copyUnicode', 'copyDots', 'copyText'].forEach(id=>{
-						const b = document.getElementById(id);
-						if (b)
-							b.textContent = this._s('copyBtn');
-					}
-					);
-					this._updateCaption();
-					this._updateSectionVisibility();
-				}
-			}
-
-
-			new BrailleConverter();
-		</script>
-	</body>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width,initial-scale=1">
+    <title>Braille Converter</title>
+    <style>
+        :root {
+            --primary: #1a73e8;
+            --on-primary: #ffffff;
+            --background: #f8f9fa;
+            --surface: #ffffff;
+            --text: #3c4043;
+            --text-secondary: #70757a;
+            --border: #dadce0;
+            --hover: #f1f3f4;
+            --active-bg: #e8f0fe;
+            --active-text: #1967d2;
+            --shadow: 0 1px 2px 0 rgba(60,64,67,0.3), 0 1px 3px 1px rgba(60,64,67,0.15);
+        }
+
+        @media (prefers-color-scheme: dark) {
+            :root:not(.light) {
+                --primary: #8ab4f8;
+                --on-primary: #202124;
+                --background: #202124;
+                --surface: #2d2e31;
+                --text: #e8eaed;
+                --text-secondary: #9aa0a6;
+                --border: #3c4043;
+                --hover: #353639;
+                --active-bg: #3c4043;
+                --active-text: #8ab4f8;
+            }
+        }
+
+        :root.dark {
+            --primary: #8ab4f8;
+            --on-primary: #202124;
+            --background: #202124;
+            --surface: #2d2e31;
+            --text: #e8eaed;
+            --text-secondary: #9aa0a6;
+            --border: #3c4043;
+            --hover: #353639;
+            --active-bg: #3c4043;
+            --active-text: #8ab4f8;
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body {
+            background: var(--background);
+            color: var(--text);
+            font-family: 'Google Sans', Roboto, Arial, sans-serif;
+            padding: 24px;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            line-height: 1.5;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            width: 100%;
+            display: flex;
+            flex-direction: column;
+            gap: 24px;
+        }
+
+        header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+        }
+
+        .title-section h1 { font-size: 28px; font-weight: 400; color: var(--text); }
+        .title-section p { font-size: 14px; color: var(--text-secondary); margin-top: 4px; }
+
+        .top-controls { display: flex; gap: 8px; }
+        select, button.btn {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            color: var(--text);
+            font-size: 14px;
+            padding: 8px 12px;
+            cursor: pointer;
+            transition: background 0.2s;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        select:hover, button.btn:hover { background: var(--hover); }
+
+        .settings-card {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 16px 24px;
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+        }
+
+        .setting-row { display: flex; align-items: center; gap: 32px; flex-wrap: wrap; }
+        .setting-group { display: flex; align-items: center; gap: 12px; }
+        .label { font-weight: 500; font-size: 14px; color: var(--text); min-width: 40px; }
+
+        .mode-toggle {
+            display: flex;
+            background: var(--hover);
+            padding: 4px;
+            border-radius: 24px;
+            align-items: center;
+        }
+
+        .mode-btn {
+            padding: 6px 16px;
+            border-radius: 20px;
+            font-size: 14px;
+            cursor: pointer;
+            border: none;
+            background: transparent;
+            color: var(--text-secondary);
+            transition: all 0.2s;
+        }
+        .mode-btn.active {
+            background: var(--surface);
+            color: var(--primary);
+            box-shadow: 0 1px 2px rgba(60,64,67,0.3);
+            font-weight: 500;
+        }
+
+        .tag-grade {
+            background: var(--active-bg);
+            color: var(--active-text);
+            font-size: 12px;
+            padding: 4px 12px;
+            border-radius: 16px;
+            font-weight: 500;
+        }
+
+        .main-layout {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
+        }
+
+        .panel {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            display: flex;
+            flex-direction: column;
+            min-height: 440px;
+        }
+
+        .panel-header {
+            padding: 10px 16px;
+            border-bottom: 1px solid var(--border);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .panel-title { font-size: 12px; font-weight: 700; color: var(--primary); text-transform: uppercase; }
+
+        .panel-body { flex: 1; padding: 16px; display: flex; flex-direction: column; position: relative; }
+
+        textarea {
+            width: 100%;
+            height: 100%;
+            border: none;
+            resize: none;
+            font-size: 24px;
+            color: var(--text);
+            background: transparent;
+            outline: none;
+            font-family: inherit;
+        }
+
+        .output-display {
+            font-size: 24px;
+            word-break: break-all;
+            white-space: pre-wrap;
+            overflow-y: auto;
+            flex: 1;
+        }
+        .braille-unicode { font-size: 32px; letter-spacing: 2px; }
+
+        .panel-footer {
+            padding: 8px 16px;
+            border-top: 1px solid var(--border);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .tabs {
+            display: flex;
+            gap: 24px;
+            border-bottom: 1px solid var(--border);
+            margin-bottom: 16px;
+        }
+        .tab {
+            padding: 8px 0;
+            font-size: 14px;
+            font-weight: 500;
+            color: var(--text-secondary);
+            cursor: pointer;
+            border-bottom: 3px solid transparent;
+            display: flex;
+            align-items: center;
+        }
+        .tab.active { color: var(--primary); border-bottom-color: var(--primary); }
+
+        .stats-bar {
+            padding: 8px 16px;
+            font-size: 12px;
+            color: var(--text-secondary);
+            display: flex;
+            gap: 16px;
+        }
+
+        .icon-btn {
+            background: transparent;
+            border: none;
+            padding: 6px;
+            border-radius: 4px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--text-secondary);
+        }
+        .icon-btn:hover { background: var(--hover); }
+
+        .visual-grid { display: flex; flex-wrap: wrap; gap: 8px; }
+        .cell-unit { display: flex; flex-direction: column; align-items: center; gap: 4px; }
+        .cell-dots {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 3px;
+            padding: 4px;
+            border: 1px solid var(--border);
+            border-radius: 4px;
+            background: var(--surface);
+        }
+        .dot { width: 8px; height: 8px; border-radius: 50%; background: #e0e0e0; }
+        .dot.on { background: var(--primary); }
+        .cell-label { font-size: 10px; color: var(--text-secondary); }
+
+        .global-footer {
+            margin-top: auto;
+            padding-top: 32px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 12px;
+            color: var(--text-secondary);
+        }
+
+        .hidden { display: none !important; }
+
+        .swap-circle {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 50%;
+            width: 32px;
+            height: 32px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            margin: 0 4px;
+            transition: background 0.2s;
+        }
+        .swap-circle:hover { background: var(--hover); }
+
+        @media (max-width: 900px) {
+            .main-layout { grid-template-columns: 1fr; }
+            .panel { min-height: 400px; }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <div class="title-section">
+                <h1 id="title">Braille Converter</h1>
+                <p id="subtitle">Convert text to Braille (Unicode or dot notation) and vice versa. Supports over 70 languages and scripts.</p>
+            </div>
+            <div class="top-controls">
+                <select id="language">
+                    <option value="en">English</option>
+                    <option value="id">Bahasa Indonesia</option>
+                </select>
+                <select id="theme">
+                    <option value="auto">Auto</option>
+                    <option value="light">Light</option>
+                    <option value="dark">Dark</option>
+                </select>
+            </div>
+        </header>
+
+        <div class="settings-card">
+            <div class="setting-row">
+                <div class="setting-group">
+                    <span class="label" id="scriptLabel">Script</span>
+<select id="script">
+<option value="ak">Akan (Ghanaian)</option>
+<option value="az">Azərbaycan (Azerbaijani)</option>
+<option value="id">Bahasa Indonesia</option>
+<option value="ca">Català (Catalan)</option>
+<option value="cy">Cymraeg (Welsh)</option>
+<option value="da">Dansk (Danish)</option>
+<option value="se">Davvisámegiella (Northern Sami)</option>
+<option value="de">Deutsch (German)</option>
+<option value="nv">Diné bizaad (Navajo)</option>
+<option value="et">Eesti (Estonian)</option>
+<option value="en">English</option>
+<option value="es">Español (Spanish)</option>
+<option value="eo">Esperanto</option>
+<option value="fil">Filipino (Tagalog)</option>
+<option value="fr">Français (French)</option>
+<option value="fo">Føroyskt (Faroese)</option>
+<option value="ga">Gaeilge (Irish)</option>
+<option value="sm">Gagana Sāmoa (Samoan)</option>
+<option value="gn">Guaraní</option>
+<option value="ha">Hausa (Nigerian)</option>
+<option value="haw">Hawaiian</option>
+<option value="ig">Igbo (Nigerian)</option>
+<option value="it">Italiano (Italian)</option>
+<option value="lv">Latviešu (Latvian)</option>
+<option value="lt">Lietuvių (Lithuanian)</option>
+<option value="lb">Lëtzebuergesch (Luxembourgish)</option>
+<option value="mt">Malti (Maltese)</option>
+<option value="mi">Māori</option>
+<option value="no">Norsk (Norwegian)</option>
+<option value="pl">Polski (Polish)</option>
+<option value="pt">Português (Portuguese)</option>
+<option value="ro">Română (Romanian)</option>
+<option value="sk">Slovenčina (Slovak)</option>
+<option value="fi">Suomi (Finnish)</option>
+<option value="sv">Svenska (Swedish)</option>
+<option value="vi">Tiếng Việt (Vietnamese)</option>
+<option value="tr">Türkçe (Turkish)</option>
+<option value="yo">Yorùbá (Yoruba)</option>
+<option value="zm">Zambian (English)</option>
+<option value="is">Íslenska (Icelandic)</option>
+<option value="el">Ελληνικά (Greek)</option>
+<option value="be">Беларуская (Belarusian)</option>
+<option value="bg">Български (Bulgarian)</option>
+<option value="ky">Кыргызча (Kyrgyz)</option>
+<option value="mn">Монгол (Mongolian)</option>
+<option value="ru">Русский (Russian)</option>
+<option value="tt">Татар (Tatar)</option>
+<option value="uk">Українська (Ukrainian)</option>
+<option value="kk">Қазақ (Kazakh)</option>
+<option value="he">עברית (Hebrew)</option>
+<option value="ur_in">اردو (Urdu - India)</option>
+<option value="ur_pk">اردو (Urdu - Pakistan)</option>
+<option value="ar">العربية (Arabic)</option>
+<option value="fa">فارسی (Persian)</option>
+<option value="hi">हिन्दी (Hindi)</option>
+<option value="bn_bd">বাংলা (Bengali - Bangladesh)</option>
+<option value="bn_in">বাংলা (Bengali - India)</option>
+<option value="pa">ਪੰਜਾਬੀ (Punjabi)</option>
+<option value="gu">ગુજરાતી (Gujarati)</option>
+<option value="or">ଓଡ଼ิଆ (Odia)</option>
+<option value="ta">தமிழ் (Tamil)</option>
+<option value="te">తెలుగు (Telugu)</option>
+<option value="kn">ಕನ್ನಡ (Kannada)</option>
+<option value="ml">മലയാളം (Malayalam)</option>
+<option value="si">සිංහල (Sinhala)</option>
+<option value="th">ไทย (Thai)</option>
+<option value="lo">ລາວ (Lao)</option>
+<option value="bo">བོད་སྐད་ (Tibetan)</option>
+<option value="dz">རྫོང་ཁา (Dzongkha)</option>
+<option value="my">မြန်မာ (Burmese)</option>
+<option value="am">አማርኛ (Amharic)</option>
+<option value="km">ខ្មែរ (Khmer)</option>
+<option value="ko">한국어 (Korean)</option>
+</select>
+                    <span class="tag-grade" id="gradeTag">Grade 1 · Uncontracted</span>
+                </div>
+            </div>
+            <div class="setting-row">
+                <div class="setting-group">
+                    <span class="label" id="dirLabel">Mode</span>
+                    <div class="mode-toggle">
+                        <button class="mode-btn active" id="btnTB" onclick="app.setMode('tb')">
+                            <span id="dirTB">Text → Braille</span>
+                        </button>
+                        <div class="swap-circle" id="swapBtn" onclick="app.swap()">
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M6.99 11L3 15l3.99 4v-3H14v-2H6.99v-3zM21 9l-3.99-4v3H10v2h7.01v3L21 9z"/></svg>
+                        </div>
+                        <button class="mode-btn" id="btnBT" onclick="app.setMode('bt')">
+                            <span id="dirBT">Braille → Text</span>
+                        </button>
+                        <button class="mode-btn" id="btnDots" onclick="app.setMode('dots')">
+                            <span id="dirDots">Dot Numbers → Braille / Text</span>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="main-layout">
+            <div class="panel">
+                <div class="panel-header">
+                    <span class="panel-title" id="inputPanelTitle">Source</span>
+                    <div style="display:flex; align-items:center; gap:12px">
+                        <span style="font-size: 11px; color: var(--text-secondary);" id="topCount">0 characters</span>
+                    </div>
+                </div>
+                <div class="panel-body">
+                    <textarea id="inputArea" placeholder="Enter text here..."></textarea>
+                    <div id="inputCaption" style="font-size: 12px; color: var(--text-secondary); margin-top: 8px;">Enter plain text. Capitals are handled automatically.</div>
+                </div>
+                <div class="panel-footer">
+                    <div style="display: flex; gap: 8px;">
+                        <button class="btn" id="clearBtn">
+                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 6L5 19M5 6l14 13"/></svg>
+                            <span id="clearBtnText">Clear</span>
+                        </button>
+                        <button class="btn" id="uploadBtn">
+                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4M17 8l-5-5-5 5M12 3v12"/></svg>
+                            <span id="uploadBtnText">Upload .txt</span>
+                        </button>
+                    </div>
+                    <div style="display: flex; gap: 8px;">
+                        <button class="btn" id="pasteBtn">
+                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M16 4h2a2 2 0 012 2v14a2 2 0 01-2 2H6a2 2 0 01-2-2V6a2 2 0 012-2h2"/><rect x="8" y="2" width="8" height="4" rx="1" ry="1"/></svg>
+                            <span id="pasteBtnText">Paste</span>
+                        </button>
+                    </div>
+                </div>
+                <div class="stats-bar">
+                    <span id="sourceCharCount">Character count: 0</span>
+                    <span id="sourceWordCount">Word count: 0</span>
+                </div>
+            </div>
+
+            <div class="panel">
+                <div class="panel-header">
+                    <span class="panel-title" id="outputPanelTitle">Translation</span>
+                    <div style="display: flex; align-items: center; gap: 12px;">
+                        <label style="display: flex; align-items: center; gap: 6px; font-size: 12px; color: var(--text-secondary); cursor:pointer">
+                            <span id="autoScrollLabel">Auto-scroll</span> <input type="checkbox" id="autoScroll" checked>
+                        </label>
+                        <button class="btn" id="copyAllBtn">
+                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M8 17.7L2 12l6-5.7M16 17.7l6-5.7-6-5.7"/></svg>
+                            <span id="copyAllBtnText">Copy all</span>
+                        </button>
+                    </div>
+                </div>
+                <div class="panel-body">
+                    <div class="tabs">
+                        <div class="tab active" onclick="app.setTab('unicode')" id="unicodeLabel">Braille Unicode</div>
+                        <div class="tab" onclick="app.setTab('dots')" id="dotsLabel">Dot Notation</div>
+                        <div class="tab" onclick="app.setTab('visual')" id="visualLabel">Visual Cells <span class="tag-grade" style="font-size: 9px; padding: 2px 6px; margin-left:4px">New</span></div>
+                    </div>
+                    <div id="unicodeOutput" class="output-display braille-unicode"></div>
+                    <div id="dotsOutput" class="output-display dots-mono hidden"></div>
+                    <div id="textOutput" class="output-display hidden"></div>
+                    <div id="visualOutput" class="output-display visual-grid hidden"></div>
+                </div>
+                <div class="panel-footer" style="border:none"></div>
+                <div class="stats-bar">
+                    <span id="outputCellCount">Braille cells: 0</span>
+                    <span id="outputCharCount">Characters: 0</span>
+                </div>
+            </div>
+        </div>
+
+
+    </div>
+
+    <script>
+        const BASE = {"a": "\u2801", "b": "\u2803", "c": "\u2809", "d": "\u2819", "e": "\u2811", "f": "\u280b", "g": "\u281b", "h": "\u2813", "i": "\u280a", "j": "\u281a", "k": "\u2805", "l": "\u2807", "m": "\u280d", "n": "\u281d", "o": "\u2815", "p": "\u280f", "q": "\u281f", "r": "\u2817", "s": "\u280e", "t": "\u281e", "u": "\u2825", "v": "\u2827", "w": "\u283a", "x": "\u282d", "y": "\u283d", "z": "\u2835"};
+        const DIGITS = {"0": "\u281a", "1": "\u2801", "2": "\u2803", "3": "\u2809", "4": "\u2819", "5": "\u2811", "6": "\u280b", "7": "\u281b", "8": "\u2813", "9": "\u280a", "\u0660": "\u281a", "\u06f0": "\u281a", "\u0661": "\u2801", "\u06f1": "\u2801", "\u0662": "\u2803", "\u06f2": "\u2803", "\u0663": "\u2809", "\u06f3": "\u2809", "\u0664": "\u2819", "\u06f4": "\u2819", "\u0665": "\u2811", "\u06f5": "\u2811", "\u0666": "\u280b", "\u06f6": "\u280b", "\u0667": "\u281b", "\u06f7": "\u281b", "\u0668": "\u2813", "\u06f8": "\u2813", "\u0669": "\u280a", "\u06f9": "\u280a"};
+        const PUNCT = {",": "\u2802", ";": "\u2806", ":": "\u2812", ".": "\u2832", "!": "\u2816", "?": "\u2826", "'": "\u2804", "-": "\u2824", "(": "\u2837", ")": "\u283e", "\"": "\u2836", "\u00ab": "\u2836", "\u00bb": "\u2836", "\u060c": "\u2802", "\u061b": "\u2806", "\u061f": "\u2826"};
+        const SCRIPTS = {"ak": {"name": "Akan (Ghanaian)", "base": true, "letters": {"\u025b": "\u282a", "\u0254": "\u283a"}}, "az": {"name": "Az\u0259rbaycan (Azerbaijani)", "base": true, "letters": {"\u00e7": "\u282f", "\u0259": "\u282a", "\u011f": "\u2823", "\u0131": "\u2814", "\u00f6": "\u282a", "\u015f": "\u2829", "\u00fc": "\u2833"}}, "id": {"name": "Bahasa Indonesia", "base": true, "letters": {}}, "ca": {"name": "Catal\u00e0 (Catalan)", "base": true, "letters": {"\u00e0": "\u2837", "\u00e8": "\u282e", "\u00e9": "\u283f", "\u00ed": "\u280c", "\u00ef": "\u283b", "\u00f2": "\u282c", "\u00f3": "\u282d", "\u00fa": "\u280e", "\u00fc": "\u2833", "\u00e7": "\u282f"}}, "cy": {"name": "Cymraeg (Welsh)", "base": true, "letters": {"\u00e2": "\u2821", "\u00ea": "\u2823", "\u00ee": "\u2829", "\u00f4": "\u2839", "\u00fb": "\u2831", "\u0175": "\u2837", "\u0177": "\u283f"}}, "da": {"name": "Dansk (Danish)", "base": true, "letters": {"\u00e5": "\u2821", "\u00e6": "\u281c", "\u00f8": "\u282a"}}, "se": {"name": "Davvis\u00e1megiella (Northern Sami)", "base": true, "letters": {"\u00e1": "\u2837", "\u010d": "\u2829", "\u0111": "\u282b", "\u014b": "\u282c", "\u0161": "\u2831", "\u0167": "\u282e", "\u017e": "\u282e"}}, "de": {"name": "Deutsch (German)", "base": true, "letters": {"\u00e4": "\u281c", "\u00f6": "\u282a", "\u00fc": "\u2833", "\u00df": "\u2806"}}, "nv": {"name": "Din\u00e9 bizaad (Navajo)", "base": true, "letters": {"\u00e1": "\u2837", "\u00e9": "\u282e", "\u00ed": "\u280c", "\u00f3": "\u282c", "\u0142": "\u2839", "\u0105": "\u2828\u2801", "\u0119": "\u2828\u2811", "\u012f": "\u2828\u280a", "\u1ecd": "\u2828\u2815"}}, "et": {"name": "Eesti (Estonian)", "base": true, "letters": {"\u00e4": "\u281c", "\u00f6": "\u282a", "\u00fc": "\u2833", "\u00f5": "\u283a", "\u0161": "\u2829", "\u017e": "\u282e"}}, "en": {"name": "English", "base": true}, "es": {"name": "Espa\u00f1ol (Spanish)", "base": true, "letters": {"\u00e1": "\u2837", "\u00e9": "\u283f", "\u00ed": "\u280c", "\u00f3": "\u282c", "\u00fa": "\u280e", "\u00fc": "\u2833", "\u00f1": "\u283b"}}, "eo": {"name": "Esperanto", "base": true, "letters": {"\u0109": "\u2829", "\u011d": "\u283b", "\u0125": "\u282f", "\u0135": "\u283a", "\u015d": "\u2831", "\u016d": "\u282c"}}, "fil": {"name": "Filipino (Tagalog)", "base": true, "letters": {"\u00f1": "\u283b"}}, "fr": {"name": "Fran\u00e7ais (French)", "base": true, "letters": {"\u00e0": "\u2837", "\u00e2": "\u2821", "\u00e7": "\u282f", "\u00e8": "\u282e", "\u00e9": "\u283f", "\u00ea": "\u2823", "\u00eb": "\u282b", "\u00ee": "\u2829", "\u00ef": "\u283b", "\u00f4": "\u2839", "\u00f9": "\u283e", "\u00fb": "\u2831", "\u00fc": "\u2833", "\u0153": "\u282a", "\u00e6": "\u281c"}}, "fo": {"name": "F\u00f8royskt (Faroese)", "base": true, "letters": {"\u00e1": "\u2837", "\u00ed": "\u280c", "\u00f3": "\u282c", "\u00fa": "\u280e", "\u00fd": "\u282f", "\u00f0": "\u282b", "\u00f8": "\u282a", "\u00e6": "\u281c"}}, "ga": {"name": "Gaeilge (Irish)", "base": true, "letters": {"\u00e1": "\u2837", "\u00e9": "\u283f", "\u00ed": "\u280c", "\u00f3": "\u282c", "\u00fa": "\u280e"}}, "sm": {"name": "Gagana S\u0101moa (Samoan)", "base": true, "letters": {"\u0101": "\u2838\u2801", "\u0113": "\u2838\u2811", "\u012b": "\u2838\u280a", "\u014d": "\u2838\u2815", "\u016b": "\u2838\u2825", "\u02bb": "\u2808"}}, "gn": {"name": "Guaran\u00ed", "base": true, "letters": {"\u00e1": "\u2837", "\u00e9": "\u283f", "\u00ed": "\u280c", "\u00f3": "\u282c", "\u00fa": "\u280e", "\u00fd": "\u282f", "\u00f1": "\u283b"}}, "ha": {"name": "Hausa (Nigerian)", "base": true, "letters": {"\u0253": "\u280f", "\u0257": "\u2839", "\u0199": "\u282d"}}, "haw": {"name": "Hawaiian", "base": true, "letters": {"\u0101": "\u2838\u2801", "\u0113": "\u2838\u2811", "\u012b": "\u2838\u280a", "\u014d": "\u2838\u2815", "\u016b": "\u2838\u2825", "\u02bb": "\u2808"}}, "ig": {"name": "Igbo (Nigerian)", "base": true, "letters": {"\u1ecb": "\u2820\u280a", "\u1ecd": "\u2820\u2815", "\u1ee5": "\u2820\u2825"}}, "it": {"name": "Italiano (Italian)", "base": true, "letters": {"\u00e0": "\u2837", "\u00e8": "\u282e", "\u00e9": "\u283f", "\u00ec": "\u280c", "\u00ee": "\u2829", "\u00f2": "\u282c", "\u00f3": "\u282d", "\u00f9": "\u283e", "\u00fb": "\u2831"}}, "lv": {"name": "Latvie\u0161u (Latvian)", "base": true, "letters": {"\u0101": "\u2820\u2801", "\u010d": "\u2829", "\u0113": "\u2820\u2811", "\u0123": "\u283b", "\u012b": "\u2820\u280a", "\u0137": "\u2825", "\u013c": "\u2827", "\u0146": "\u283d", "\u0161": "\u2831", "\u016b": "\u2820\u2825", "\u017e": "\u282e"}}, "lt": {"name": "Lietuvi\u0173 (Lithuanian)", "base": true, "letters": {"\u0105": "\u2821", "\u010d": "\u2829", "\u0119": "\u2831", "\u0117": "\u282e", "\u012f": "\u280c", "\u0161": "\u2831", "\u0173": "\u281e", "\u016b": "\u283e", "\u017e": "\u282a"}}, "lb": {"name": "L\u00ebtzebuergesch (Luxembourgish)", "base": true, "letters": {"\u00e4": "\u281c", "\u00eb": "\u282b", "\u00e9": "\u283f"}}, "mt": {"name": "Malti (Maltese)", "base": true, "letters": {"\u010b": "\u2829", "\u0121": "\u283b", "\u0127": "\u282f", "\u017c": "\u283a"}}, "mi": {"name": "M\u0101ori", "base": true, "letters": {"\u0101": "\u2838\u2801", "\u0113": "\u2838\u2811", "\u012b": "\u2838\u280a", "\u014d": "\u2838\u2815", "\u016b": "\u2838\u2825"}}, "no": {"name": "Norsk (Norwegian)", "base": true, "letters": {"\u00e5": "\u2821", "\u00e6": "\u281c", "\u00f8": "\u282a"}}, "pl": {"name": "Polski (Polish)", "base": true, "letters": {"\u0105": "\u2821", "\u0107": "\u2829", "\u0119": "\u2831", "\u0142": "\u2823", "\u0144": "\u2839", "\u00f3": "\u282c", "\u015b": "\u282a", "\u017a": "\u282e", "\u017c": "\u282f"}}, "pt": {"name": "Portugu\u00eas (Portuguese)", "base": true, "letters": {"\u00e1": "\u2837", "\u00e2": "\u2821", "\u00e3": "\u281c", "\u00e0": "\u2837", "\u00e9": "\u283f", "\u00ea": "\u2823", "\u00ed": "\u280c", "\u00f3": "\u282c", "\u00f4": "\u2839", "\u00f5": "\u282a", "\u00fa": "\u280e", "\u00e7": "\u282f"}}, "ro": {"name": "Rom\u00e2n\u0103 (Romanian)", "base": true, "letters": {"\u0103": "\u2821", "\u00e2": "\u282b", "\u00ee": "\u282f", "\u0219": "\u2831", "\u021b": "\u2839"}}, "sk": {"name": "Sloven\u010dina (Slovak)", "base": true, "letters": {"\u00e1": "\u2821", "\u00e4": "\u281c", "\u010d": "\u2829", "\u010f": "\u2839", "\u00e9": "\u2823", "\u00ed": "\u280c", "\u013a": "\u282f", "\u013e": "\u2837", "\u0148": "\u2839", "\u00f3": "\u282a", "\u0155": "\u283a", "\u0161": "\u2831", "\u0165": "\u2833", "\u00fa": "\u282c", "\u00fd": "\u283f", "\u017e": "\u282e"}}, "fi": {"name": "Suomi (Finnish)", "base": true, "letters": {"\u00e5": "\u2821", "\u00e4": "\u281c", "\u00f6": "\u282a"}}, "sv": {"name": "Svenska (Swedish)", "base": true, "letters": {"\u00e5": "\u2821", "\u00e4": "\u281c", "\u00f6": "\u282a"}}, "vi": {"name": "Ti\u1ebfng Vi\u1ec7t (Vietnamese)", "base": true, "letters": {"a": "\u2801", "\u0103": "\u281c", "\u00e2": "\u2821", "e": "\u2811", "\u00ea": "\u2823", "i": "\u280a", "o": "\u2815", "\u00f4": "\u2839", "\u01a1": "\u282a", "u": "\u2825", "\u01b0": "\u2833", "y": "\u283d", "\u0111": "\u282e", "\u00e1": "\u2808\u2801", "\u00e0": "\u2802\u2801", "\u1ea3": "\u2828\u2801", "\u00e3": "\u2824\u2801", "\u1ea1": "\u2820\u2801", "\u1eaf": "\u2808\u281c", "\u1eb1": "\u2802\u281c", "\u1eb3": "\u2828\u281c", "\u1eb5": "\u2824\u281c", "\u1eb7": "\u2820\u281c", "\u1ea5": "\u2808\u2821", "\u1ea7": "\u2802\u2821", "\u1ea9": "\u2828\u2821", "\u1eab": "\u2824\u2821", "\u1ead": "\u2820\u2821", "\u00e9": "\u2808\u2811", "\u00e8": "\u2802\u2811", "\u1ebb": "\u2828\u2811", "\u1ebd": "\u2824\u2811", "\u1eb9": "\u2820\u2811", "\u1ebf": "\u2808\u2823", "\u1ec1": "\u2802\u2823", "\u1ec3": "\u2828\u2823", "\u1ec5": "\u2824\u2823", "\u1ec7": "\u2820\u2823", "\u00ed": "\u2808\u280a", "\u00ec": "\u2802\u280a", "\u1ec9": "\u2828\u280a", "\u0129": "\u2824\u280a", "\u1ecb": "\u2820\u280a", "\u00f3": "\u2808\u2815", "\u00f2": "\u2802\u2815", "\u1ecf": "\u2828\u2815", "\u00f5": "\u2824\u2815", "\u1ecd": "\u2820\u2815", "\u1ed1": "\u2808\u2839", "\u1ed3": "\u2802\u2839", "\u1ed5": "\u2828\u2839", "\u1ed7": "\u2824\u2839", "\u1ed9": "\u2820\u2839", "\u1edb": "\u2808\u282a", "\u1edd": "\u2802\u282a", "\u1edf": "\u2828\u282a", "\u1ee1": "\u2824\u282a", "\u1ee3": "\u2820\u282a", "\u00fa": "\u2808\u2825", "\u00f9": "\u2802\u2825", "\u1ee7": "\u2828\u2825", "\u0169": "\u2824\u2825", "\u1ee5": "\u2820\u2825", "\u1ee9": "\u2808\u2833", "\u1eeb": "\u2802\u2833", "\u1eed": "\u2828\u2833", "\u1eef": "\u2824\u2833", "\u1ef1": "\u2820\u2833", "\u00fd": "\u2808\u283d", "\u1ef3": "\u2802\u283d", "\u1ef7": "\u2828\u283d", "\u1ef9": "\u2824\u283d", "\u1ef5": "\u2820\u283d"}}, "tr": {"name": "T\u00fcrk\u00e7e (Turkish)", "base": true, "letters": {"\u00e7": "\u2821", "\u011f": "\u2823", "\u0131": "\u2814", "\u00f6": "\u282a", "\u015f": "\u2829", "\u00fc": "\u2833"}}, "yo": {"name": "Yor\u00f9b\u00e1 (Yoruba)", "base": true, "letters": {"\u1eb9": "\u282a", "\u1ecd": "\u283a", "\u1e63": "\u2829"}}, "zm": {"name": "Zambian (English)", "base": true, "letters": {}}, "is": {"name": "\u00cdslenska (Icelandic)", "base": true, "letters": {"\u00e1": "\u2821", "\u00f0": "\u282b", "\u00e9": "\u281c", "\u00ed": "\u280c", "\u00f3": "\u282a", "\u00fa": "\u282c", "\u00fd": "\u282f", "\u00fe": "\u2839", "\u00e6": "\u283b", "\u00f6": "\u283a"}}, "el": {"name": "\u0395\u03bb\u03bb\u03b7\u03bd\u03b9\u03ba\u03ac (Greek)", "letters": {"\u03b1": "\u2801", "\u03b2": "\u2803", "\u03b3": "\u281b", "\u03b4": "\u2819", "\u03b5": "\u2811", "\u03b6": "\u2835", "\u03b7": "\u2831", "\u03b8": "\u2839", "\u03b9": "\u280a", "\u03ba": "\u2805", "\u03bb": "\u2807", "\u03bc": "\u280d", "\u03bd": "\u281d", "\u03be": "\u282d", "\u03bf": "\u2815", "\u03c0": "\u280f", "\u03c1": "\u2817", "\u03c3": "\u280e", "\u03c4": "\u281e", "\u03c5": "\u282f", "\u03c6": "\u280b", "\u03c7": "\u2813", "\u03c8": "\u281f", "\u03c9": "\u283a"}}, "be": {"name": "\u0411\u0435\u043b\u0430\u0440\u0443\u0441\u043a\u0430\u044f (Belarusian)", "letters": {"\u0430": "\u2801", "\u0431": "\u2803", "\u0432": "\u283a", "\u0433": "\u281b", "\u0434": "\u2819", "\u0435": "\u2811", "\u0451": "\u2821", "\u0436": "\u281a", "\u0437": "\u2835", "\u0438": "\u280a", "\u0439": "\u282f", "\u043a": "\u2805", "\u043b": "\u2807", "\u043c": "\u280d", "\u043d": "\u281d", "\u043e": "\u2815", "\u043f": "\u280f", "\u0440": "\u2817", "\u0441": "\u280e", "\u0442": "\u281e", "\u0443": "\u2825", "\u0444": "\u280b", "\u0445": "\u2813", "\u0446": "\u2809", "\u0447": "\u281f", "\u0448": "\u2831", "\u0449": "\u282d", "\u044a": "\u2837", "\u044b": "\u282e", "\u044c": "\u283e", "\u044d": "\u282a", "\u044e": "\u2833", "\u044f": "\u282b", "\u0456": "\u280a", "\u045e": "\u282c"}}, "bg": {"name": "\u0411\u044a\u043b\u0433\u0430\u0440\u0441\u043a\u0438 (Bulgarian)", "letters": {"\u0430": "\u2801", "\u0431": "\u2803", "\u0432": "\u283a", "\u0433": "\u281b", "\u0434": "\u2819", "\u0435": "\u2811", "\u0451": "\u2821", "\u0436": "\u281a", "\u0437": "\u2835", "\u0438": "\u280a", "\u0439": "\u282f", "\u043a": "\u2805", "\u043b": "\u2807", "\u043c": "\u280d", "\u043d": "\u281d", "\u043e": "\u2815", "\u043f": "\u280f", "\u0440": "\u2817", "\u0441": "\u280e", "\u0442": "\u281e", "\u0443": "\u2825", "\u0444": "\u280b", "\u0445": "\u2813", "\u0446": "\u2809", "\u0447": "\u281f", "\u0448": "\u2831", "\u0449": "\u282d", "\u044a": "\u2837", "\u044b": "\u282e", "\u044c": "\u283e", "\u044d": "\u282a", "\u044e": "\u2833", "\u044f": "\u282b"}}, "ky": {"name": "\u041a\u044b\u0440\u0433\u044b\u0437\u0447\u0430 (Kyrgyz)", "letters": {"\u0430": "\u2801", "\u0431": "\u2803", "\u0432": "\u283a", "\u0433": "\u281b", "\u0434": "\u2819", "\u0435": "\u2811", "\u0451": "\u2821", "\u0436": "\u281a", "\u0437": "\u2835", "\u0438": "\u280a", "\u0439": "\u282f", "\u043a": "\u2805", "\u043b": "\u2807", "\u043c": "\u280d", "\u043d": "\u281d", "\u043e": "\u2815", "\u043f": "\u280f", "\u0440": "\u2817", "\u0441": "\u280e", "\u0442": "\u281e", "\u0443": "\u2825", "\u0444": "\u280b", "\u0445": "\u2813", "\u0446": "\u2809", "\u0447": "\u281f", "\u0448": "\u2831", "\u0449": "\u282d", "\u044a": "\u2837", "\u044b": "\u282e", "\u044c": "\u283e", "\u044d": "\u282a", "\u044e": "\u2833", "\u044f": "\u282b", "\u04d9": "\u2816", "\u0493": "\u2823", "\u049b": "\u283f", "\u04a3": "\u2829", "\u04e9": "\u282a", "\u04b1": "\u2839", "\u04af": "\u2833", "\u04bb": "\u281c", "\u0456": "\u280c"}}, "mn": {"name": "\u041c\u043e\u043d\u0433\u043e\u043b (Mongolian)", "letters": {"\u0430": "\u2801", "\u0431": "\u2803", "\u0432": "\u283a", "\u0433": "\u281b", "\u0434": "\u2819", "\u0435": "\u2811", "\u0451": "\u2821", "\u0436": "\u281a", "\u0437": "\u2835", "\u0438": "\u280a", "\u0439": "\u282f", "\u043a": "\u2805", "\u043b": "\u2807", "\u043c": "\u280d", "\u043d": "\u281d", "\u043e": "\u2815", "\u043f": "\u280f", "\u0440": "\u2817", "\u0441": "\u280e", "\u0442": "\u281e", "\u0443": "\u2825", "\u0444": "\u280b", "\u0445": "\u2813", "\u0446": "\u2809", "\u0447": "\u281f", "\u0448": "\u2831", "\u0449": "\u282d", "\u044a": "\u2837", "\u044b": "\u282e", "\u044c": "\u283e", "\u044d": "\u282a", "\u044e": "\u2833", "\u044f": "\u282b", "\u04d9": "\u2816", "\u0493": "\u2823", "\u049b": "\u283f", "\u04a3": "\u2829", "\u04e9": "\u282a", "\u04b1": "\u2839", "\u04af": "\u2833", "\u04bb": "\u281c", "\u0456": "\u280c"}}, "ru": {"name": "\u0420\u0443\u0441\u0441\u043a\u0438\u0439 (Russian)", "letters": {"\u0430": "\u2801", "\u0431": "\u2803", "\u0432": "\u283a", "\u0433": "\u281b", "\u0434": "\u2819", "\u0435": "\u2811", "\u0451": "\u2821", "\u0436": "\u281a", "\u0437": "\u2835", "\u0438": "\u280a", "\u0439": "\u282f", "\u043a": "\u2805", "\u043b": "\u2807", "\u043c": "\u280d", "\u043d": "\u281d", "\u043e": "\u2815", "\u043f": "\u280f", "\u0440": "\u2817", "\u0441": "\u280e", "\u0442": "\u281e", "\u0443": "\u2825", "\u0444": "\u280b", "\u0445": "\u2813", "\u0446": "\u2809", "\u0447": "\u281f", "\u0448": "\u2831", "\u0449": "\u282d", "\u044a": "\u2837", "\u044b": "\u282e", "\u044c": "\u283e", "\u044d": "\u282a", "\u044e": "\u2833", "\u044f": "\u282b"}}, "tt": {"name": "\u0422\u0430\u0442\u0430\u0440 (Tatar)", "letters": {"\u0430": "\u2801", "\u0431": "\u2803", "\u0432": "\u283a", "\u0433": "\u281b", "\u0434": "\u2819", "\u0435": "\u2811", "\u0451": "\u2821", "\u0436": "\u281a", "\u0437": "\u2835", "\u0438": "\u280a", "\u0439": "\u282f", "\u043a": "\u2805", "\u043b": "\u2807", "\u043c": "\u280d", "\u043d": "\u281d", "\u043e": "\u2815", "\u043f": "\u280f", "\u0440": "\u2817", "\u0441": "\u280e", "\u0442": "\u281e", "\u0443": "\u2825", "\u0444": "\u280b", "\u0445": "\u2813", "\u0446": "\u2809", "\u0447": "\u281f", "\u0448": "\u2831", "\u0449": "\u282d", "\u044a": "\u2837", "\u044b": "\u282e", "\u044c": "\u283e", "\u044d": "\u282a", "\u044e": "\u2833", "\u044f": "\u282b", "\u04d9": "\u2816", "\u0493": "\u2823", "\u049b": "\u283f", "\u04a3": "\u2829", "\u04e9": "\u282a", "\u04b1": "\u2839", "\u04af": "\u2833", "\u04bb": "\u281c", "\u0456": "\u280c"}}, "uk": {"name": "\u0423\u043a\u0440\u0430\u0457\u043d\u0441\u044c\u043a\u0430 (Ukrainian)", "letters": {"\u0430": "\u2801", "\u0431": "\u2803", "\u0432": "\u283a", "\u0433": "\u281b", "\u0434": "\u2819", "\u0435": "\u2811", "\u0451": "\u2821", "\u0436": "\u281a", "\u0437": "\u2835", "\u0438": "\u280a", "\u0439": "\u282f", "\u043a": "\u2805", "\u043b": "\u2807", "\u043c": "\u280d", "\u043d": "\u281d", "\u043e": "\u2815", "\u043f": "\u280f", "\u0440": "\u2817", "\u0441": "\u280e", "\u0442": "\u281e", "\u0443": "\u2825", "\u0444": "\u280b", "\u0445": "\u2813", "\u0446": "\u2809", "\u0447": "\u281f", "\u0448": "\u2831", "\u0449": "\u282d", "\u044a": "\u2837", "\u044b": "\u282e", "\u044c": "\u283e", "\u044d": "\u282a", "\u044e": "\u2833", "\u044f": "\u282b", "\u0456": "\u280a", "\u0457": "\u283b", "\u0454": "\u281e", "\u0491": "\u283b"}}, "kk": {"name": "\u049a\u0430\u0437\u0430\u049b (Kazakh)", "letters": {"\u0430": "\u2801", "\u0431": "\u2803", "\u0432": "\u283a", "\u0433": "\u281b", "\u0434": "\u2819", "\u0435": "\u2811", "\u0451": "\u2821", "\u0436": "\u281a", "\u0437": "\u2835", "\u0438": "\u280a", "\u0439": "\u282f", "\u043a": "\u2805", "\u043b": "\u2807", "\u043c": "\u280d", "\u043d": "\u281d", "\u043e": "\u2815", "\u043f": "\u280f", "\u0440": "\u2817", "\u0441": "\u280e", "\u0442": "\u281e", "\u0443": "\u2825", "\u0444": "\u280b", "\u0445": "\u2813", "\u0446": "\u2809", "\u0447": "\u281f", "\u0448": "\u2831", "\u0449": "\u282d", "\u044a": "\u2837", "\u044b": "\u282e", "\u044c": "\u283e", "\u044d": "\u282a", "\u044e": "\u2833", "\u044f": "\u282b", "\u04d9": "\u2816", "\u0493": "\u2823", "\u049b": "\u283f", "\u04a3": "\u2829", "\u04e9": "\u282a", "\u04b1": "\u2839", "\u04af": "\u2833", "\u04bb": "\u281c", "\u0456": "\u280c"}}, "he": {"name": "\u05e2\u05d1\u05e8\u05d9\u05ea (Hebrew)", "letters": {"\u05d0": "\u2801", "\u05d1": "\u2803", "\u05d2": "\u281b", "\u05d3": "\u2819", "\u05d4": "\u2813", "\u05d5": "\u283a", "\u05d6": "\u2835", "\u05d7": "\u282d", "\u05d8": "\u283e", "\u05d9": "\u280a", "\u05db": "\u2805", "\u0644": "\u2807", "\u05de": "\u280d", "\u05e0": "\u281d", "\u05e1": "\u280e", "\u05e2": "\u2837", "\u05e4": "\u280b", "\u05e6": "\u282f", "\u05e7": "\u281f", "\u0631": "\u2817", "\u05e9": "\u2829", "\u05ea": "\u281e"}}, "ar": {"name": "\u0627\u0644\u0639\u0631\u0628\u064a\u0629 (Arabic)", "letters": {"\u0627": "\u2801", "\u0628": "\u2803", "\u062a": "\u281e", "\u062b": "\u2839", "\u062c": "\u281a", "\u062d": "\u2831", "\u062e": "\u282d", "\u062f": "\u2819", "\u0630": "\u282e", "\u0631": "\u2817", "\u0632": "\u2835", "\u0633": "\u280e", "\u0634": "\u2829", "\u0635": "\u282f", "\u0636": "\u282b", "\u0637": "\u283e", "\u0638": "\u283f", "\u0639": "\u2837", "\u063a": "\u2823", "\u0641": "\u280b", "\u0642": "\u281f", "\u0643": "\u2805", "\u0644": "\u2807", "\u0645": "\u280d", "\u0646": "\u281d", "\u0647": "\u2813", "\u0648": "\u283a", "\u064a": "\u280a", "\u0623": "\u280c", "\u0625": "\u2828", "\u0622": "\u281c", "\u0624": "\u2833", "\u0626": "\u283d", "\u0629": "\u2821", "\u0649": "\u2815", "\u0644\u0627": "\u2827"}}, "fa": {"name": "\u0641\u0627\u0631\u0633\u06cc (Persian)", "letters": {"\u0627": "\u2801", "\u0628": "\u2803", "\u062a": "\u281e", "\u062b": "\u2839", "\u062c": "\u281a", "\u062d": "\u2831", "\u062e": "\u282d", "\u062f": "\u2819", "\u0630": "\u282e", "\u0631": "\u2817", "\u0632": "\u2835", "\u0633": "\u280e", "\u0634": "\u2829", "\u0635": "\u282f", "\u0636": "\u282b", "\u0637": "\u283e", "\u0638": "\u283f", "\u0639": "\u2837", "\u063a": "\u2823", "\u0641": "\u280b", "\u0642": "\u281f", "\u0643": "\u2805", "\u0644": "\u2807", "\u0645": "\u280d", "\u0646": "\u281d", "\u0647": "\u2813", "\u0648": "\u283a", "\u064a": "\u280a", "\u0623": "\u280c", "\u0625": "\u2828", "\u0622": "\u281c", "\u0624": "\u2833", "\u0626": "\u283d", "\u0629": "\u2821", "\u0649": "\u2815", "\u0644\u0627": "\u2827", "\u067e": "\u280f", "\u0686": "\u2809", "\u0698": "\u281a", "\u06af": "\u281b", "\u06cc": "\u280a"}}, "hi": {"name": "\u0939\u093f\u0928\u094d\u0926\u0940 (Hindi)", "halantPrefix": true, "halantChar": "\u094d", "letters": {"\u0905": "\u2801", "\u0906": "\u281c", "\u0907": "\u280a", "\u0908": "\u2814", "\u0909": "\u2825", "\u090a": "\u2833", "\u090b": "\u2837", "\u090f": "\u2811", "\u0910": "\u280c", "\u0913": "\u2815", "\u0914": "\u282a", "\u0915": "\u2805", "\u0916": "\u2828", "\u0917": "\u281b", "\u0918": "\u2823", "\u0919": "\u282c", "\u091a": "\u2809", "\u091b": "\u2821", "\u091c": "\u281a", "\u091d": "\u2834", "\u091e": "\u2812", "\u091f": "\u283e", "\u0920": "\u283a", "\u0921": "\u282b", "\u0922": "\u283f", "\u0923": "\u283c", "\u0924": "\u281e", "\u0925": "\u2839", "\u0926": "\u2819", "\u0927": "\u282e", "\u0928": "\u281d", "\u092a": "\u280f", "\u092b": "\u2816", "\u092c": "\u2803", "\u092d": "\u2818", "\u092e": "\u280d", "\u092f": "\u283d", "\u0930": "\u2817", "\u0932": "\u2807", "\u0935": "\u2827", "\u0936": "\u2829", "\u0937": "\u282f", "\u0938": "\u280e", "\u0939": "\u2813", "\u093e": "\u281c", "\u093f": "\u280a", "\u0940": "\u2814", "\u0941": "\u2825", "\u0942": "\u2833", "\u0947": "\u2811", "\u0948": "\u280c", "\u094b": "\u2815", "\u094c": "\u282a", "\u094d": "\u2808", "\u0901": "\u2804", "\u0902": "\u2830", "\u0903": "\u2820"}}, "bn_bd": {"name": "\u09ac\u09be\u0982\u09b2\u09be (Bengali - Bangladesh)", "halantPrefix": true, "halantChar": "\u09cd", "letters": {"\u0985": "\u2801", "\u0986": "\u281c", "\u0987": "\u280a", "\u0988": "\u2814", "\u0989": "\u2825", "\u098a": "\u2833", "\u098b": "\u2837", "\u098f": "\u2811", "\u0990": "\u280c", "\u0993": "\u2815", "\u0994": "\u282a", "\u0995": "\u2805", "\u0996": "\u2828", "\u0997": "\u281b", "\u0998": "\u2823", "\u0999": "\u282c", "\u099a": "\u2809", "\u099b": "\u2821", "\u099c": "\u281a", "\u099d": "\u2834", "\u099e": "\u2812", "\u099f": "\u283e", "\u09a0": "\u283a", "\u09a1": "\u282b", "\u09a2": "\u283f", "\u09a3": "\u283c", "\u09a4": "\u281e", "\u09a5": "\u2839", "\u09a6": "\u2819", "\u09a7": "\u282e", "\u09a8": "\u281d", "\u09aa": "\u280f", "\u09ab": "\u2816", "\u09ac": "\u2803", "\u09ad": "\u2818", "\u09ae": "\u280d", "\u09af": "\u283d", "\u09b0": "\u2817", "\u09b2": "\u2807", "\u09b5": "\u2827", "\u09b6": "\u2829", "\u09b7": "\u282f", "\u09b8": "\u280e", "\u09b9": "\u2813", "\u09be": "\u281c", "\u09bf": "\u280a", "\u09c0": "\u2814", "\u09c1": "\u2825", "\u09c2": "\u2833", "\u09c7": "\u2811", "\u09c8": "\u280c", "\u09cb": "\u2815", "\u09cc": "\u282a", "\u09cd": "\u2808", "\u0981": "\u2804", "\u0982": "\u2830", "\u0983": "\u2820", "\u09dc": "\u283b", "\u09dd": "\u283f", "\u09df": "\u283d", "\u09ce": "\u281e"}}, "bn_in": {"name": "\u09ac\u09be\u0982\u09b2\u09be (Bengali - India)", "halantPrefix": true, "halantChar": "\u09cd", "letters": {"\u0985": "\u2801", "\u0986": "\u281c", "\u0987": "\u280a", "\u0988": "\u2814", "\u0989": "\u2825", "\u098a": "\u2833", "\u098b": "\u2837", "\u098f": "\u2811", "\u0990": "\u280c", "\u0993": "\u2815", "\u0994": "\u282a", "\u0995": "\u2805", "\u0996": "\u2828", "\u0997": "\u281b", "\u0998": "\u2823", "\u0999": "\u282c", "\u099a": "\u2809", "\u099b": "\u2821", "\u099c": "\u281a", "\u099d": "\u2834", "\u099e": "\u2812", "\u099f": "\u283e", "\u09a0": "\u283a", "\u09a1": "\u282b", "\u09a2": "\u283f", "\u09a3": "\u283c", "\u09a4": "\u281e", "\u09a5": "\u2839", "\u09a6": "\u2819", "\u09a7": "\u282e", "\u09a8": "\u281d", "\u09aa": "\u280f", "\u09ab": "\u2816", "\u09ac": "\u2803", "\u09ad": "\u2818", "\u09ae": "\u280d", "\u09af": "\u283d", "\u09b0": "\u2817", "\u09b2": "\u2807", "\u09b5": "\u2827", "\u09b6": "\u2829", "\u09b7": "\u282f", "\u09b8": "\u280e", "\u09b9": "\u2813", "\u09be": "\u281c", "\u09bf": "\u280a", "\u09c0": "\u2814", "\u09c1": "\u2825", "\u09c2": "\u2833", "\u09c7": "\u2811", "\u09c8": "\u280c", "\u09cb": "\u2815", "\u09cc": "\u282a", "\u09cd": "\u2808", "\u0981": "\u2804", "\u0982": "\u2830", "\u0983": "\u2820", "\u09dc": "\u283b", "\u09dd": "\u283f", "\u09df": "\u283d", "\u09ce": "\u281e"}}, "pa": {"name": "\u0a2a\u0a70\u0a1c\u0a3e\u0a2c\u0a40 (Punjabi)", "halantPrefix": true, "halantChar": "\u0a4d", "letters": {"\u0a05": "\u2801", "\u0a06": "\u281c", "\u0a07": "\u280a", "\u0a08": "\u2814", "\u0a09": "\u2825", "\u0a0a": "\u2833", "\u0a0b": "\u2837", "\u0a0f": "\u2811", "\u0a10": "\u280c", "\u0a13": "\u2815", "\u0a14": "\u282a", "\u0a15": "\u2805", "\u0a16": "\u2828", "\u0a17": "\u281b", "\u0a18": "\u2823", "\u0a19": "\u282c", "\u0a1a": "\u2809", "\u0a1b": "\u2821", "\u0a1c": "\u281a", "\u0a1d": "\u2834", "\u0a1e": "\u2812", "\u0a1f": "\u283e", "\u0a20": "\u283a", "\u0a21": "\u282b", "\u0a22": "\u283f", "\u0a23": "\u283c", "\u0a24": "\u281e", "\u0a25": "\u2839", "\u0a26": "\u2819", "\u0a27": "\u282e", "\u0a28": "\u281d", "\u0a2a": "\u280f", "\u0a2b": "\u2816", "\u0a2c": "\u2803", "\u0a2d": "\u2818", "\u0a2e": "\u280d", "\u0a2f": "\u283d", "\u0a30": "\u2817", "\u0a32": "\u2807", "\u0a35": "\u2827", "\u0a36": "\u2829", "\u0a37": "\u282f", "\u0a38": "\u280e", "\u0a39": "\u2813", "\u0a3e": "\u281c", "\u0a3f": "\u280a", "\u0a40": "\u2814", "\u0a41": "\u2825", "\u0a42": "\u2833", "\u0a47": "\u2811", "\u0a48": "\u280c", "\u0a4b": "\u2815", "\u0a4c": "\u282a", "\u0a4d": "\u2808", "\u0a01": "\u2804", "\u0a02": "\u2830", "\u0a03": "\u2820"}}, "gu": {"name": "\u0a97\u0ac1\u0a9c\u0ab0\u0abe\u0aa4\u0ac0 (Gujarati)", "halantPrefix": true, "halantChar": "\u0acd", "letters": {"\u0a85": "\u2801", "\u0a86": "\u281c", "\u0a87": "\u280a", "\u0a88": "\u2814", "\u0a89": "\u2825", "\u0a8a": "\u2833", "\u0a8b": "\u2837", "\u0a8f": "\u2811", "\u0a90": "\u280c", "\u0a93": "\u2815", "\u0a94": "\u282a", "\u0a95": "\u2805", "\u0a96": "\u2828", "\u0a97": "\u281b", "\u0a98": "\u2823", "\u0a99": "\u282c", "\u0a9a": "\u2809", "\u0a9b": "\u2821", "\u0a9c": "\u281a", "\u0a9d": "\u2834", "\u0a9e": "\u2812", "\u0a9f": "\u283e", "\u0aa0": "\u283a", "\u0aa1": "\u282b", "\u0aa2": "\u283f", "\u0aa3": "\u283c", "\u0aa4": "\u281e", "\u0aa5": "\u2839", "\u0aa6": "\u2819", "\u0aa7": "\u282e", "\u0aa8": "\u281d", "\u0aaa": "\u280f", "\u0aab": "\u2816", "\u0aac": "\u2803", "\u0aad": "\u2818", "\u0aae": "\u280d", "\u0aaf": "\u283d", "\u0ab0": "\u2817", "\u0ab2": "\u2807", "\u0ab5": "\u2827", "\u0ab6": "\u2829", "\u0ab7": "\u282f", "\u0ab8": "\u280e", "\u0ab9": "\u2813", "\u0abe": "\u281c", "\u0abf": "\u280a", "\u0ac0": "\u2814", "\u0ac1": "\u2825", "\u0ac2": "\u2833", "\u0ac7": "\u2811", "\u0ac8": "\u280c", "\u0acb": "\u2815", "\u0acc": "\u282a", "\u0acd": "\u2808", "\u0a81": "\u2804", "\u0a82": "\u2830", "\u0a83": "\u2820"}}, "or": {"name": "\u0b13\u0b21\u0b3c\u0e34\u0b06 (Odia)", "halantPrefix": true, "halantChar": "\u0b4d", "letters": {"\u0b05": "\u2801", "\u0b06": "\u281c", "\u0b07": "\u280a", "\u0b08": "\u2814", "\u0b09": "\u2825", "\u0b0a": "\u2833", "\u0b0b": "\u2837", "\u0b0f": "\u2811", "\u0b10": "\u280c", "\u0b13": "\u2815", "\u0b14": "\u282a", "\u0b15": "\u2805", "\u0b16": "\u2828", "\u0b17": "\u281b", "\u0b18": "\u2823", "\u0b19": "\u282c", "\u0b1a": "\u2809", "\u0b1b": "\u2821", "\u0b1c": "\u281a", "\u0b1d": "\u2834", "\u0b1e": "\u2812", "\u0b1f": "\u283e", "\u0b20": "\u283a", "\u0b21": "\u282b", "\u0b22": "\u283f", "\u0b23": "\u283c", "\u0b24": "\u281e", "\u0b25": "\u2839", "\u0b26": "\u2819", "\u0b27": "\u282e", "\u0b28": "\u281d", "\u0b2a": "\u280f", "\u0b2b": "\u2816", "\u0b2c": "\u2803", "\u0b2d": "\u2818", "\u0b2e": "\u280d", "\u0b2f": "\u283d", "\u0b30": "\u2817", "\u0b32": "\u2807", "\u0b35": "\u2827", "\u0b36": "\u2829", "\u0b37": "\u282f", "\u0b38": "\u280e", "\u0b39": "\u2813", "\u0b3e": "\u281c", "\u0b3f": "\u280a", "\u0b40": "\u2814", "\u0b41": "\u2825", "\u0b42": "\u2833", "\u0b47": "\u2811", "\u0b48": "\u280c", "\u0b4b": "\u2815", "\u0b4c": "\u282a", "\u0b4d": "\u2808", "\u0b01": "\u2804", "\u0b02": "\u2830", "\u0b03": "\u2820"}}, "ta": {"name": "\u0ba4\u0bae\u0bbf\u0bb4\u0bcd (Tamil)", "halantPrefix": true, "halantChar": "\u0bcd", "letters": {"\u0b85": "\u2801", "\u0b86": "\u281c", "\u0b87": "\u280a", "\u0b88": "\u2814", "\u0b89": "\u2825", "\u0b8a": "\u2833", "\u0b8b": "\u2837", "\u0b8f": "\u2811", "\u0b90": "\u280c", "\u0b93": "\u2815", "\u0b94": "\u282a", "\u0b95": "\u2805", "\u0b96": "\u2828", "\u0b97": "\u281b", "\u0b98": "\u2823", "\u0b99": "\u282c", "\u0b9a": "\u2809", "\u0b9b": "\u2821", "\u0b9c": "\u281a", "\u0b9d": "\u2834", "\u0b9e": "\u2812", "\u0b9f": "\u283e", "\u0ba0": "\u283a", "\u0ba1": "\u282b", "\u0ba2": "\u283f", "\u0ba3": "\u283c", "\u0ba4": "\u281e", "\u0ba5": "\u2839", "\u0ba6": "\u2819", "\u0ba7": "\u282e", "\u0ba8": "\u281d", "\u0baa": "\u280f", "\u0bab": "\u2816", "\u0bac": "\u2803", "\u0bad": "\u2818", "\u0bae": "\u280d", "\u0baf": "\u283d", "\u0bb0": "\u2817", "\u0bb2": "\u2807", "\u0bb5": "\u2827", "\u0bb6": "\u2829", "\u0bb7": "\u282f", "\u0bb8": "\u280e", "\u0bb9": "\u2813", "\u0bbe": "\u281c", "\u0bbf": "\u280a", "\u0bc0": "\u2814", "\u0bc1": "\u2825", "\u0bc2": "\u2833", "\u0bc7": "\u2811", "\u0bc8": "\u280c", "\u0bcb": "\u2815", "\u0bcc": "\u282a", "\u0bcd": "\u2808", "\u0b81": "\u2804", "\u0b82": "\u2830", "\u0b83": "\u2820"}}, "te": {"name": "\u0c24\u0c46\u0c32\u0c41\u0c17\u0c41 (Telugu)", "halantPrefix": true, "halantChar": "\u0c4d", "letters": {"\u0c05": "\u2801", "\u0c06": "\u281c", "\u0c07": "\u280a", "\u0c08": "\u2814", "\u0c09": "\u2825", "\u0c0a": "\u2833", "\u0c0b": "\u2837", "\u0c0f": "\u2811", "\u0c10": "\u280c", "\u0c13": "\u2815", "\u0c14": "\u282a", "\u0c15": "\u2805", "\u0c16": "\u2828", "\u0c17": "\u281b", "\u0c18": "\u2823", "\u0c19": "\u282c", "\u0c1a": "\u2809", "\u0c1b": "\u2821", "\u0c1c": "\u281a", "\u0c1d": "\u2834", "\u0c1e": "\u2812", "\u0c1f": "\u283e", "\u0c20": "\u283a", "\u0c21": "\u282b", "\u0c22": "\u283f", "\u0c23": "\u283c", "\u0c24": "\u281e", "\u0c25": "\u2839", "\u0c26": "\u2819", "\u0c27": "\u282e", "\u0c28": "\u281d", "\u0c2a": "\u280f", "\u0c2b": "\u2816", "\u0c2c": "\u2803", "\u0c2d": "\u2818", "\u0c2e": "\u280d", "\u0c2f": "\u283d", "\u0c30": "\u2817", "\u0c32": "\u2807", "\u0c35": "\u2827", "\u0c36": "\u2829", "\u0c37": "\u282f", "\u0c38": "\u280e", "\u0c39": "\u2813", "\u0c3e": "\u281c", "\u0c3f": "\u280a", "\u0c40": "\u2814", "\u0c41": "\u2825", "\u0c42": "\u2833", "\u0c47": "\u2811", "\u0c48": "\u280c", "\u0c4b": "\u2815", "\u0c4c": "\u282a", "\u0c4d": "\u2808", "\u0c01": "\u2804", "\u0c02": "\u2830", "\u0c03": "\u2820"}}, "kn": {"name": "\u0c95\u0ca8\u0ccd\u0ca8\u0ca1 (Kannada)", "halantPrefix": true, "halantChar": "\u0ccd", "letters": {"\u0c85": "\u2801", "\u0c86": "\u281c", "\u0c87": "\u280a", "\u0c88": "\u2814", "\u0c89": "\u2825", "\u0c8a": "\u2833", "\u0c8b": "\u2837", "\u0c8f": "\u2811", "\u0c90": "\u280c", "\u0c93": "\u2815", "\u0c94": "\u282a", "\u0c95": "\u2805", "\u0c96": "\u2828", "\u0c97": "\u281b", "\u0c98": "\u2823", "\u0c99": "\u282c", "\u0c9a": "\u2809", "\u0c9b": "\u2821", "\u0c9c": "\u281a", "\u0c9d": "\u2834", "\u0c9e": "\u2812", "\u0c9f": "\u283e", "\u0ca0": "\u283a", "\u0ca1": "\u282b", "\u0ca2": "\u283f", "\u0ca3": "\u283c", "\u0ca4": "\u281e", "\u0ca5": "\u2839", "\u0ca6": "\u2819", "\u0ca7": "\u282e", "\u0ca8": "\u281d", "\u0caa": "\u280f", "\u0cab": "\u2816", "\u0cac": "\u2803", "\u0cad": "\u2818", "\u0cae": "\u280d", "\u0caf": "\u283d", "\u0cb0": "\u2817", "\u0cb2": "\u2807", "\u0cb5": "\u2827", "\u0cb6": "\u2829", "\u0cb7": "\u282f", "\u0cb8": "\u280e", "\u0cb9": "\u2813", "\u0cbe": "\u281c", "\u0cbf": "\u280a", "\u0cc0": "\u2814", "\u0cc1": "\u2825", "\u0cc2": "\u2833", "\u0cc7": "\u2811", "\u0cc8": "\u280c", "\u0ccb": "\u2815", "\u0ccc": "\u282a", "\u0ccd": "\u2808", "\u0c81": "\u2804", "\u0c82": "\u2830", "\u0c83": "\u2820"}}, "ml": {"name": "\u0d2e\u0d32\u0d2f\u0d3e\u0d33\u0d02 (Malayalam)", "halantPrefix": true, "halantChar": "\u0d4d", "letters": {"\u0d05": "\u2801", "\u0d06": "\u281c", "\u0d07": "\u280a", "\u0d08": "\u2814", "\u0d09": "\u2825", "\u0d0a": "\u2833", "\u0d0b": "\u2837", "\u0d0f": "\u2811", "\u0d10": "\u280c", "\u0d13": "\u2815", "\u0d14": "\u282a", "\u0d15": "\u2805", "\u0d16": "\u2828", "\u0d17": "\u281b", "\u0d18": "\u2823", "\u0d19": "\u282c", "\u0d1a": "\u2809", "\u0d1b": "\u2821", "\u0d1c": "\u281a", "\u0d1d": "\u2834", "\u0d1e": "\u2812", "\u0d1f": "\u283e", "\u0d20": "\u283a", "\u0d21": "\u282b", "\u0d22": "\u283f", "\u0d23": "\u283c", "\u0d24": "\u281e", "\u0d25": "\u2839", "\u0d26": "\u2819", "\u0d27": "\u282e", "\u0d28": "\u281d", "\u0d2a": "\u280f", "\u0d2b": "\u2816", "\u0d2c": "\u2803", "\u0d2d": "\u2818", "\u0d2e": "\u280d", "\u0d2f": "\u283d", "\u0d30": "\u2817", "\u0d32": "\u2807", "\u0d35": "\u2827", "\u0d36": "\u2829", "\u0d37": "\u282f", "\u0d38": "\u280e", "\u0d39": "\u2813", "\u0d3e": "\u281c", "\u0d3f": "\u280a", "\u0d40": "\u2814", "\u0d41": "\u2825", "\u0d42": "\u2833", "\u0d47": "\u2811", "\u0d48": "\u280c", "\u0d4b": "\u2815", "\u0d4c": "\u282a", "\u0d4d": "\u2808", "\u0d01": "\u2804", "\u0d02": "\u2830", "\u0d03": "\u2820"}}, "si": {"name": "\u0dc3\u0dd2\u0d82\u0dc4\u0dbd (Sinhala)", "halantPrefix": true, "halantChar": "\u0dca", "letters": {"\u0d85": "\u2801", "\u0d86": "\u281c", "\u0d87": "\u280a", "\u0d88": "\u2814", "\u0d89": "\u2825", "\u0d8a": "\u2833", "\u0d8b": "\u2837", "\u0d8f": "\u2811", "\u0d90": "\u280c", "\u0d93": "\u2815", "\u0d94": "\u282a", "\u0d95": "\u2805", "\u0d96": "\u2828", "\u0d97": "\u281b", "\u0d98": "\u2823", "\u0d99": "\u282c", "\u0d9a": "\u2809", "\u0d9b": "\u2821", "\u0d9c": "\u281a", "\u0d9d": "\u2834", "\u0d9e": "\u2812", "\u0d9f": "\u283e", "\u0da0": "\u283a", "\u0da1": "\u282b", "\u0da2": "\u283f", "\u0da3": "\u283c", "\u0da4": "\u281e", "\u0da5": "\u2839", "\u0da6": "\u2819", "\u0da7": "\u282e", "\u0da8": "\u281d", "\u0daa": "\u280f", "\u0dab": "\u2816", "\u0dac": "\u2803", "\u0dad": "\u2818", "\u0dae": "\u280d", "\u0daf": "\u283d", "\u0db0": "\u2817", "\u0db2": "\u2807", "\u0db5": "\u2827", "\u0db6": "\u2829", "\u0db7": "\u282f", "\u0db8": "\u280e", "\u0db9": "\u2813", "\u0dbe": "\u281c", "\u0dbf": "\u280a", "\u0dc0": "\u2814", "\u0dc1": "\u2825", "\u0dc2": "\u2833", "\u0dc7": "\u2811", "\u0dc8": "\u280c", "\u0dcb": "\u2815", "\u0dcc": "\u282a", "\u0dcd": "\u2808", "\u0d81": "\u2804", "\u0d82": "\u2830", "\u0d83": "\u2820", "\u0dca": "\u2808"}}, "th": {"name": "\u0e44\u0e17\u0e22 (Thai)", "letters": {"\u0e01": "\u2805", "\u0e02": "\u2828", "\u0e03": "\u281b", "\u0e04": "\u281b", "\u0e05": "\u281b", "\u0e06": "\u2823", "\u0e07": "\u282c", "\u0e08": "\u2809", "\u0e09": "\u2821", "\u0e0a": "\u281a", "\u0e0b": "\u282e", "\u0e0c": "\u2834", "\u0e0d": "\u2812", "\u0e0e": "\u283e", "\u0e0f": "\u283a", "\u0e10": "\u282b", "\u0e11": "\u283f", "\u0e12": "\u283c", "\u0e13": "\u283c", "\u0e14": "\u2819", "\u0e15": "\u281e", "\u0e16": "\u2839", "\u0e17": "\u2819", "\u0e18": "\u282e", "\u0e19": "\u281d", "\u0e1a": "\u280f", "\u0e1b": "\u2803", "\u0e1c": "\u2816", "\u0e1d": "\u280b", "\u0e1e": "\u2818", "\u0e1f": "\u282b", "\u0e20": "\u283f", "\u0e21": "\u280d", "\u0e22": "\u283d", "\u0e23": "\u2817", "\u0e24": "\u2807", "\u0e25": "\u2827", "\u0e26": "\u2829", "\u0e27": "\u282f", "\u0e28": "\u280e", "\u0e29": "\u2813", "\u0e2a": "\u2838", "\u0e2b": "\u2801", "\u0e30": "\u281c", "\u0e31": "\u2802", "\u0e32": "\u2802", "\u0e33": "\u280a", "\u0e34": "\u2814", "\u0e35": "\u2829", "\u0e36": "\u282b", "\u0e37": "\u2825", "\u0e38": "\u2827", "\u0e40": "\u2811", "\u0e41": "\u280c", "\u0e42": "\u2815", "\u0e43": "\u2817", "\u0e44": "\u2814", "\u0e45": "\u2808"}, "preProcess": text => { return text.replace(/([เ-ไ])([ก-ฮ])/g, "$2$1"); }}, "lo": {"name": "\u0ea5\u0eb2\u0ea7 (Lao)", "letters": {"\u0e81": "\u2805", "\u0e82": "\u2828", "\u0e84": "\u282c", "\u0e86": "\u2809", "\u0e88": "\u280e", "\u0e89": "\u281a", "\u0e8b": "\u2812", "\u0e8d": "\u2819", "\u0e8f": "\u281e", "\u0e90": "\u2839", "\u0e91": "\u2819", "\u0e93": "\u281d", "\u0e95": "\u280f", "\u0e96": "\u2803", "\u0e98": "\u2816", "\u0e99": "\u280b", "\u0e9a": "\u2818", "\u0e9b": "\u282b", "\u0e9c": "\u280d", "\u0e9d": "\u283d", "\u0e9e": "\u2817", "\u0ea0": "\u2807", "\u0ea1": "\u2827", "\u0ea3": "\u2813", "\u0ea5": "\u2801", "\u0eb0": "\u281c", "\u0eb1": "\u2802", "\u0eb2": "\u2802", "\u0eb3": "\u280a", "\u0eb4": "\u2814", "\u0eb5": "\u2829", "\u0eb6": "\u282b", "\u0eb7": "\u2825", "\u0eb8": "\u2827", "\u0ec0": "\u2811", "\u0ec1": "\u280c", "\u0ec2": "\u2815", "\u0ec3": "\u2817", "\u0ec4": "\u2814"}, "preProcess": text => { return text.replace(/([ເ-ໄ])([຀-ຮ])/g, "$2$1"); }}, "bo": {"name": "\u0f56\u0f7c\u0f51\u0f0b\u0f66\u0f90\u0f51\u0f0b (Tibetan)", "letters": {"\u0f40": "\u2805", "\u0f41": "\u2828", "\u0f42": "\u281b", "\u0f44": "\u282c", "\u0f45": "\u2809", "\u0f46": "\u2821", "\u0f47": "\u281a", "\u0f49": "\u2812", "\u0f4a": "\u283e", "\u0f4b": "\u283a", "\u0f4c": "\u282b", "\u0f4d": "\u283f", "\u0f4e": "\u283c", "\u0f4f": "\u281e", "\u0f50": "\u2839", "\u0f51": "\u2819", "\u0f52": "\u282e", "\u0f53": "\u281d", "\u0f54": "\u280f", "\u0f55": "\u2816", "\u0f56": "\u2803", "\u0f57": "\u2818", "\u0f58": "\u280d", "\u0f59": "\u282d", "\u0f5a": "\u283d", "\u0f5b": "\u282f", "\u0f5c": "\u281e", "\u0f5d": "\u2827", "\u0f5e": "\u2831", "\u0f5f": "\u2835", "\u0f60": "\u2801", "\u0f61": "\u283d", "\u0f62": "\u2817", "\u0f63": "\u2807", "\u0f64": "\u2829", "\u0f65": "\u282f", "\u0f66": "\u280e", "\u0f67": "\u2813"}}, "dz": {"name": "\u0f62\u0fab\u0f7c\u0f44\u0f0b\u0f41\u0e32 (Dzongkha)", "letters": {"\u0f40": "\u2805", "\u0f41": "\u2828", "\u0f42": "\u281b", "\u0f44": "\u282c", "\u0f45": "\u2809", "\u0f46": "\u2821", "\u0f47": "\u281a", "\u0f49": "\u2812", "\u0f4a": "\u283e", "\u0f4b": "\u283a", "\u0f4c": "\u282b", "\u0f4d": "\u283f", "\u0f4e": "\u283c", "\u0f4f": "\u281e", "\u0f50": "\u2839", "\u0f51": "\u2819", "\u0f52": "\u282e", "\u0f53": "\u281d", "\u0f54": "\u280f", "\u0f55": "\u2816", "\u0f56": "\u2803", "\u0f57": "\u2818", "\u0f58": "\u280d", "\u0f59": "\u282d", "\u0f5a": "\u283d", "\u0f5b": "\u282f", "\u0f5c": "\u281e", "\u0f5d": "\u2827", "\u0f5e": "\u2831", "\u0f5f": "\u2835", "\u0f60": "\u2801", "\u0f61": "\u283d", "\u0f62": "\u2817", "\u0f63": "\u2807", "\u0f64": "\u2829", "\u0f65": "\u282f", "\u0f66": "\u280e", "\u0f67": "\u2813"}}, "my": {"name": "\u1019\u103c\u1014\u103a\u1019\u102c (Burmese)", "letters": {"\u1000": "\u2805", "\u1001": "\u2828", "\u1002": "\u281b", "\u1003": "\u2823", "\u1004": "\u282c", "\u1005": "\u2809", "\u1006": "\u2821", "\u1007": "\u281a", "\u1008": "\u2834", "\u1009": "\u2812", "\u100a": "\u283e", "\u100b": "\u283a", "\u100c": "\u282b", "\u100d": "\u283f", "\u100e": "\u283c", "\u100f": "\u281e", "\u1010": "\u2839", "\u1011": "\u2819", "\u1012": "\u282e", "\u1013": "\u281d", "\u1014": "\u280f", "\u1015": "\u2816", "\u1016": "\u2803", "\u1017": "\u2818", "\u1018": "\u280d", "\u1019": "\u283d", "\u101a": "\u2817", "\u101b": "\u2807", "\u101c": "\u2827", "\u101d": "\u280e", "\u101e": "\u2813", "\u101f": "\u2838", "\u1020": "\u2801", "\u1039": "\u2808", "\u102b": "\u2802", "\u102c": "\u2802", "\u102d": "\u280a", "\u102e": "\u2814", "\u102f": "\u2829", "\u1030": "\u282b", "\u1031": "\u2825", "\u1032": "\u2827"}}, "am": {"name": "\u12a0\u121b\u122d\u129b (Amharic)", "letters": {"\u1200": "\u2813", "\u1201": "\u2813\u2825", "\u1202": "\u2813\u280a", "\u1203": "\u2813\u2802", "\u1204": "\u2813\u2811", "\u1205": "\u2813\u2808", "\u1206": "\u2813\u2815", "\u1208": "\u2807", "\u1209": "\u2807\u2825", "\u120a": "\u2807\u280a", "\u120b": "\u2807\u2802", "\u120c": "\u2807\u2811", "\u120d": "\u2807\u2808", "\u120e": "\u2807\u2815", "\u1210": "\u2839", "\u1211": "\u2839\u2825", "\u1212": "\u2839\u280a", "\u1213": "\u2839\u2802", "\u1214": "\u2839\u2811", "\u1215": "\u2839\u2808", "\u1216": "\u2839\u2815", "\u1218": "\u280d", "\u1219": "\u280d\u2825", "\u121a": "\u280d\u280a", "\u121b": "\u280d\u2802", "\u121c": "\u280d\u2811", "\u121d": "\u280d\u2808", "\u121e": "\u280d\u2815", "\u1220": "\u282f", "\u1221": "\u282f\u2825", "\u1222": "\u282f\u280a", "\u1223": "\u282f\u2802", "\u1224": "\u282f\u2811", "\u1225": "\u282f\u2808", "\u1226": "\u282f\u2815", "\u1228": "\u2817", "\u1229": "\u2817\u2825", "\u122a": "\u2817\u280a", "\u122b": "\u2817\u2802", "\u122c": "\u2817\u2811", "\u122d": "\u2817\u2808", "\u122e": "\u2817\u2815", "\u1230": "\u280e", "\u1231": "\u280e\u2825", "\u1232": "\u280e\u280a", "\u1233": "\u280e\u2802", "\u1234": "\u280e\u2811", "\u1235": "\u280e\u2808", "\u1236": "\u280e\u2815", "\u1238": "\u2829", "\u1239": "\u2829\u2825", "\u123a": "\u2829\u280a", "\u123b": "\u2829\u2802", "\u123c": "\u2829\u2811", "\u123d": "\u2829\u2808", "\u123e": "\u2829\u2815", "\u1240": "\u281f", "\u1241": "\u281f\u2825", "\u1242": "\u281f\u280a", "\u1243": "\u281f\u2802", "\u1244": "\u281f\u2811", "\u1245": "\u281f\u2808", "\u1246": "\u281f\u2815", "\u1248": "\u2803", "\u1249": "\u2803\u2825", "\u124a": "\u2803\u280a", "\u124b": "\u2803\u2802", "\u124c": "\u2803\u2811", "\u124d": "\u2803\u2808", "\u124e": "\u2803\u2815", "\u1250": "\u281e", "\u1251": "\u281e\u2825", "\u1252": "\u281e\u280a", "\u1253": "\u281e\u2802", "\u1254": "\u281e\u2811", "\u1255": "\u281e\u2808", "\u1256": "\u281e\u2815", "\u1258": "\u2809", "\u1259": "\u2809\u2825", "\u125a": "\u2809\u280a", "\u125b": "\u2809\u2802", "\u125c": "\u2809\u2811", "\u125d": "\u2809\u2808", "\u125e": "\u2809\u2815", "\u1260": "\u283d", "\u1261": "\u283d\u2825", "\u1262": "\u283d\u280a", "\u1263": "\u283d\u2802", "\u1264": "\u283d\u2811", "\u1265": "\u283d\u2808", "\u1266": "\u283d\u2815", "\u1268": "\u283b", "\u1269": "\u283b\u2825", "\u126a": "\u283b\u280a", "\u126b": "\u283b\u2802", "\u126c": "\u283b\u2811", "\u126d": "\u283b\u2808", "\u126e": "\u283b\u2815", "\u1270": "\u2801", "\u1271": "\u2801\u2825", "\u1272": "\u2801\u280a", "\u1273": "\u2801\u2802", "\u1274": "\u2801\u2811", "\u1275": "\u2801\u2808", "\u1276": "\u2801\u2815", "\u1278": "\u2805", "\u1279": "\u2805\u2825", "\u127a": "\u2805\u280a", "\u127b": "\u2805\u2802", "\u127c": "\u2805\u2811", "\u127d": "\u2805\u2808", "\u127e": "\u2805\u2815", "\u1280": "\u281b", "\u1281": "\u281b\u2825", "\u1282": "\u281b\u280a", "\u1283": "\u281b\u2802", "\u1284": "\u281b\u2811", "\u1285": "\u281b\u2808", "\u1286": "\u281b\u2815", "\u1288": "\u283a", "\u1289": "\u283a\u2825", "\u128a": "\u283a\u280a", "\u128b": "\u283a\u2802", "\u128c": "\u283a\u2811", "\u128d": "\u283a\u2808", "\u128e": "\u283a\u2815", "\u1290": "\u2837", "\u1291": "\u2837\u2825", "\u1292": "\u2837\u280a", "\u1293": "\u2837\u2802", "\u1294": "\u2837\u2811", "\u1295": "\u2837\u2808", "\u1296": "\u2837\u2815", "\u1298": "\u2835", "\u1299": "\u2835\u2825", "\u129a": "\u2835\u280a", "\u129b": "\u2835\u2802", "\u129c": "\u2835\u2811", "\u129d": "\u2835\u2808", "\u129e": "\u2835\u2815", "\u12a0": "\u281a", "\u12a1": "\u281a\u2825", "\u12a2": "\u281a\u280a", "\u12a3": "\u281a\u2802", "\u12a4": "\u281a\u2811", "\u12a5": "\u281a\u2808", "\u12a6": "\u281a\u2815", "\u12a8": "\u283d", "\u12a9": "\u283d\u2825", "\u12aa": "\u283d\u280a", "\u12ab": "\u283d\u2802", "\u12ac": "\u283d\u2811", "\u12ad": "\u283d\u2808", "\u12ae": "\u283d\u2815", "\u12b0": "\u2819", "\u12b1": "\u2819\u2825", "\u12b2": "\u2819\u280a", "\u12b3": "\u2819\u2802", "\u12b4": "\u2819\u2811", "\u12b5": "\u2819\u2808", "\u12b6": "\u2819\u2815", "\u12b8": "\u283a", "\u12b9": "\u283a\u2825", "\u12ba": "\u283a\u280a", "\u12bb": "\u283a\u2802", "\u12bc": "\u283a\u2811", "\u12bd": "\u283a\u2808", "\u12be": "\u283a\u2815", "\u12c0": "\u281b", "\u12c1": "\u281b\u2825", "\u12c2": "\u281b\u280a", "\u12c3": "\u281b\u2802", "\u12c4": "\u281b\u2811", "\u12c5": "\u281b\u2808", "\u12c6": "\u281b\u2815", "\u12c8": "\u283e", "\u12c9": "\u283e\u2825", "\u12ca": "\u283e\u280a", "\u12cb": "\u283e\u2802", "\u12cc": "\u283e\u2811", "\u12cd": "\u283e\u2808", "\u12ce": "\u283e\u2815", "\u12d0": "\u281f", "\u12d1": "\u281f\u2825", "\u12d2": "\u281f\u280a", "\u12d3": "\u281f\u2802", "\u12d4": "\u281f\u2811", "\u12d5": "\u281f\u2808", "\u12d6": "\u281f\u2815", "\u12d8": "\u280f", "\u12d9": "\u280f\u2825", "\u12da": "\u280f\u280a", "\u12db": "\u280f\u2802", "\u12dc": "\u280f\u2811", "\u12dd": "\u280f\u2808", "\u12de": "\u280f\u2815", "\u12e0": "\u2819", "\u12e1": "\u2819\u2825", "\u12e2": "\u2819\u280a", "\u12e3": "\u2819\u2802", "\u12e4": "\u2819\u2811", "\u12e5": "\u2819\u2808", "\u12e6": "\u2819\u2815", "\u12e8": "\u282e", "\u12e9": "\u282e\u2825", "\u12ea": "\u282e\u280a", "\u12eb": "\u282e\u2802", "\u12ec": "\u282e\u2811", "\u12ed": "\u282e\u2808", "\u12ee": "\u282e\u2815", "\u12f0": "\u280b", "\u12f1": "\u280b\u2825", "\u12f2": "\u280b\u280a", "\u12f3": "\u280b\u2802", "\u12f4": "\u280b\u2811", "\u12f5": "\u280b\u2808", "\u12f6": "\u280b\u2815", "\u12f8": "\u2827", "\u12f9": "\u2827\u2825", "\u12fa": "\u2827\u280a", "\u12fb": "\u2827\u2802", "\u12fc": "\u2827\u2811", "\u12fd": "\u2827\u2808", "\u12fe": "\u2827\u2815"}}, "km": {"name": "\u1781\u17d2\u1798\u17c2\u179a (Khmer)", "letters": {"\u1780": "\u2805", "\u1781": "\u2828", "\u1782": "\u281b", "\u1783": "\u2823", "\u1784": "\u282c", "\u1785": "\u2809", "\u1786": "\u2821", "\u1787": "\u281a", "\u1788": "\u2834", "\u1789": "\u2812", "\u178a": "\u283e", "\u178b": "\u283a", "\u178c": "\u282b", "\u178d": "\u283f", "\u178e": "\u283c", "\u178f": "\u281e", "\u1790": "\u2839", "\u1791": "\u2819", "\u1792": "\u282e", "\u1793": "\u281d", "\u1794": "\u280f", "\u1795": "\u2816", "\u1796": "\u2803", "\u1797": "\u2818", "\u1798": "\u280d", "\u1799": "\u283d", "\u179a": "\u2817", "\u179b": "\u2807", "\u179c": "\u2827", "\u179d": "\u280e", "\u179e": "\u2813", "\u179f": "\u2838", "\u17a0": "\u2801", "\u17d2": "\u2808"}}, "ko": {"name": "한국어 (Korean)", "letters": {"\u1100": "\u2808", "\u1101": "\u2820\u2808", "\u1102": "\u2809", "\u1103": "\u280a", "\u1104": "\u2820\u280a", "\u1105": "\u2802", "\u1106": "\u2811", "\u1107": "\u2818", "\u1108": "\u2820\u2818", "\u1109": "\u2820", "\u110a": "\u2820\u2820", "\u110b": "", "\u110c": "\u2828", "\u110d": "\u2820\u2828", "\u110e": "\u2810", "\u110f": "\u280b", "\u1110": "\u2813", "\u1111": "\u2819", "\u1112": "\u281a", "\u1161": "\u2823", "\u1162": "\u2817", "\u1163": "\u280c", "\u1164": "\u280c\u2817", "\u1165": "\u280e", "\u1166": "\u281d", "\u1167": "\u2831", "\u1168": "\u280c\u281d", "\u1169": "\u2825", "\u116a": "\u2825\u2823", "\u116b": "\u2825\u2817", "\u116c": "\u283d", "\u116d": "\u2824", "\u116e": "\u280f", "\u116f": "\u280f\u280e", "\u1170": "\u280f\u281d", "\u1171": "\u280f\u2817", "\u1172": "\u2813", "\u1173": "\u282a", "\u1174": "\u282a\u2815", "\u1175": "\u2815", "\u11a8": "\u2801", "\u11a9": "\u2801\u2801", "\u11aa": "\u2801\u2804", "\u11ab": "\u2812", "\u11ac": "\u2812\u2805", "\u11ad": "\u2812\u2830", "\u11ae": "\u2814", "\u11af": "\u2824", "\u11b0": "\u2830\u2801", "\u11b1": "\u2830\u2822", "\u11b2": "\u2830\u2803", "\u11b3": "\u2830\u2804", "\u11b4": "\u2830\u2816", "\u11b5": "\u2830\u2826", "\u11b6": "\u2830\u2834", "\u11b7": "\u2822", "\u11b8": "\u2803", "\u11b9": "\u2803\u2804", "\u11ba": "\u2804", "\u11bb": "\u280c", "\u11bc": "\u2836", "\u11bd": "\u2805", "\u11be": "\u2809", "\u11bf": "\u2806", "\u11c0": "\u2816", "\u11c1": "\u2826", "\u11c2": "\u2834"}, "preProcess": text => { return [...text].map(c => { const code = c.charCodeAt(0); if (code >= 0xAC00 && code <= 0xD7A3) { const SIndex = code - 0xAC00; const LIndex = Math.floor(SIndex / 588); const VIndex = Math.floor((SIndex % 588) / 28); const TIndex = SIndex % 28; let res = String.fromCharCode(0x1100 + LIndex) + String.fromCharCode(0x1161 + VIndex); if (TIndex > 0) res += String.fromCharCode(0x11A7 + TIndex); return res; } return c; }).join(""); } }, "ur_pk": {"name": "\u0627\u0631\u062f\u0648 (Urdu - Pakistan)", "letters": {"\u0627": "\u2801", "\u0628": "\u2803", "\u067e": "\u280f", "\u062a": "\u281e", "\u0679": "\u283a", "\u062b": "\u2839", "\u062c": "\u281a", "\u0686": "\u2809", "\u062d": "\u2831", "\u062e": "\u282d", "\u062f": "\u2819", "\u0688": "\u282b", "\u0630": "\u282e", "\u0631": "\u2817", "\u0691": "\u283d", "\u0632": "\u2835", "\u0698": "\u2833", "\u0633": "\u280e", "\u0634": "\u2815", "\u0635": "\u282f", "\u0636": "\u281b", "\u0637": "\u283e", "\u0638": "\u283f", "\u0639": "\u2837", "\u063a": "\u2823", "\u0641": "\u280b", "\u0642": "\u281f", "\u06a9": "\u2805", "\u06af": "\u281b", "\u0644": "\u2807", "\u0645": "\u280d", "\u0646": "\u281d", "\u06ba": "\u2830", "\u0648": "\u283a", "\u06c1": "\u2813", "\u06be": "\u2821", "\u0621": "\u2804", "\u06cc": "\u280a", "\u06d2": "\u2815", "\u0652": "\u2804"}}, "ur_in": {"name": "\u0627\u0631\u062f\u0648 (Urdu - India)", "halantPrefix": true, "halantChar": "\u0652", "letters": {"\u0627": "\u2801", "\u0628": "\u2803", "\u067e": "\u280f", "\u062a": "\u281e", "\u0679": "\u283a", "\u062b": "\u2839", "\u062c": "\u281a", "\u0686": "\u2809", "\u062d": "\u2831", "\u062e": "\u282d", "\u062f": "\u2819", "\u0688": "\u282b", "\u0630": "\u282e", "\u0631": "\u2817", "\u0691": "\u283d", "\u0632": "\u2835", "\u0698": "\u2833", "\u0633": "\u280e", "\u0634": "\u2829", "\u0635": "\u282f", "\u0636": "\u281b", "\u0637": "\u283e", "\u0638": "\u283f", "\u0639": "\u2837", "\u063a": "\u2823", "\u0641": "\u280b", "\u0642": "\u281f", "\u06a9": "\u2805", "\u06af": "\u281b", "\u0644": "\u2807", "\u0645": "\u280d", "\u0646": "\u281d", "\u06ba": "\u2830", "\u0648": "\u283a", "\u06c1": "\u2813", "\u06be": "\u2821", "\u0621": "\u2804", "\u06cc": "\u280a", "\u06d2": "\u2815", "\u0622": "\u2801\u2802", "\u0624": "\u283a\u2804", "\u0626": "\u2804\u280a", "\u0652": "\u2808"}}};
+
+        const BLANK = "\u2800";
+        const NUM_SIGN = "\u283c";
+        const CAP_SIGN = "\u2820";
+
+        function charToDots(ch) {
+            const n = ch.charCodeAt(0) - 0x2800;
+            if (n < 0 || n > 63) return [];
+            return [1, 2, 3, 4, 5, 6].filter(b=>n & (1 << (b - 1)));
+        }
+
+        function textToBraille(text, scriptKey) {
+            const script = SCRIPTS[scriptKey] || SCRIPTS.zm;
+            let processed = text;
+            if (script.preProcess) processed = script.preProcess(text);
+            const letters = script.letters || {};
+            const sortedKeys = Object.keys(letters).sort((a,b)=>b.length - a.length);
+            const cells = [];
+            let inNum = false, i = 0;
+            while (i < processed.length) {
+                const ch = processed[i];
+                if (ch === '\n' || ch === '\r' || ch === ' ' || ch === '\t') {
+                    inNum = false; cells.push({braille: BLANK, source: ch==='\n'||ch==='\r'?'↵':ch, isSpace: true}); i++; continue;
+                }
+                if (DIGITS[ch]) {
+                    if (!inNum) { cells.push({braille: NUM_SIGN, source: '⠼', isPrefix: true}); inNum = true; }
+                    cells.push({braille: DIGITS[ch], source: ch}); i++; continue;
+                }
+                inNum = false;
+                let found = false;
+                for (const key of sortedKeys) {
+                    if (processed.toLowerCase().startsWith(key.toLowerCase(), i)) {
+                        const source = processed.substring(i, i + key.length);
+                        if (source !== key.toLowerCase() && source === source.toUpperCase()) cells.push({braille: CAP_SIGN, source: '⠠', isPrefix: true});
+                        const brailleStr = letters[key];
+                        if (script.halantPrefix && key === script.halantChar && cells.length > 0) {
+                            const last = cells.pop();
+                            cells.push({braille: brailleStr[0], source: key, isPrefix: true});
+                            cells.push(last);
+                        } else {
+                            for (const b of brailleStr) cells.push({braille: b, source: key.length === 1 ? key : source});
+                        }
+                        i += key.length; found = true; break;
+                    }
+                }
+                if (!found) {
+                    if (BASE[ch.toLowerCase()]) {
+                        if (ch !== ch.toLowerCase()) cells.push({braille: CAP_SIGN, source: '⠠', isPrefix: true});
+                        cells.push({braille: BASE[ch.toLowerCase()], source: ch});
+                    } else if (PUNCT[ch]) {
+                        cells.push({braille: PUNCT[ch], source: ch});
+                    } else {
+                        cells.push({braille: BLANK, source: ch});
+                    }
+                    i++;
+                }
+            }
+            return cells;
+        }
+
+        function brailleToText(input, scriptKey) {
+            const script = SCRIPTS[scriptKey] || SCRIPTS.zm;
+            const scriptLetters = script.letters || {};
+            const revMap = [];
+            for (const [char, b] of Object.entries(scriptLetters)) revMap.push({ b, char });
+            for (const [char, b] of Object.entries(PUNCT)) revMap.push({ b, char });
+            for (const [char, b] of Object.entries(BASE)) revMap.push({ b, char });
+            const seen = new Set();
+            const uniqueRevMap = [];
+            for (const item of revMap) { if (!seen.has(item.b)) { uniqueRevMap.push(item); seen.add(item.b); } }
+            uniqueRevMap.sort((a, b) => b.b.length - a.b.length);
+            let result = "", i = 0, capNext = false, inNum = false;
+            const revDigits = Object.fromEntries(Object.entries(DIGITS).map(([k, v]) => [v, k]));
+            while (i < input.length) {
+                const ch = input[i];
+                if (ch === ' ' || ch === BLANK) { result += ' '; inNum = false; i++; continue; }
+                if (ch === CAP_SIGN) { capNext = true; i++; continue; }
+                if (ch === NUM_SIGN) { inNum = true; i++; continue; }
+                if (inNum) { const digit = revDigits[ch]; if (digit !== undefined) { result += digit; i++; continue; } inNum = false; }
+                let matched = false;
+                for (const { b, char } of uniqueRevMap) {
+                    if (input.startsWith(b, i)) {
+                        let text = char;
+                        if (capNext) { text = text.toUpperCase(); capNext = false; }
+                        result += text; i += b.length; matched = true; break;
+                    }
+                }
+                if (!matched) { result += '?'; i++; capNext = false; }
+            }
+            return result;
+        }
+
+        const text = {
+            en: {
+                title: 'Braille Converter',
+                subtitle: 'Convert text to Braille (Unicode or dot notation) and vice versa. Supports over 70 languages and scripts.',
+                scriptLabel: 'Script',
+                gradeTag: 'Grade 1 · Uncontracted',
+                dirLabel: 'Mode',
+                dirTB: 'Text → Braille',
+                dirBT: 'Braille → Text',
+                dirDots: 'Dot Numbers → Braille / Text',
+                inputPanelTitle: 'Source',
+                outputPanelTitle: 'Translation',
+                unicodeLabel: 'Braille Unicode',
+                dotsLabel: 'Dot Notation',
+                visualLabel: 'Visual Cells',
+                clearBtnText: 'Clear',
+                uploadBtnText: 'Upload .txt',
+                pasteBtnText: 'Paste',
+                copyAllBtnText: 'Copy all',
+                autoScrollLabel: 'Auto-scroll',
+                privateLabel: 'Private & Secure',
+                privateSub: 'All processing happens in your browser',
+                supportsLangs: 'Supports 70+ languages and scripts',
+                kbdShortcuts: 'Keyboard Shortcuts',
+                helpLabel: 'Help',
+                copiedBtn: 'Copied ✓',
+                captionTB: 'Enter plain text. Capitals are handled automatically.',
+                captionBT: 'Paste Braille Unicode characters.',
+                captionDots: 'Enter space-separated dot cells (e.g. 123 15).',
+                placeholder: '—',
+                charCount: 'Character count: ',
+                wordCount: 'Word count: ',
+                brailleCells: 'Braille cells: ',
+                characters: 'Characters: ',
+                charsPlural: ' characters'
+            },
+            id: {
+                title: 'Konverter Braille',
+                subtitle: 'Konversi teks ke Braille dan sebaliknya. Mendukung lebih dari 70 bahasa dan aksara.',
+                scriptLabel: 'Aksara',
+                gradeTag: 'Kelas 1 · Tidak Disingkat',
+                dirLabel: 'Mode',
+                dirTB: 'Teks → Braille',
+                dirBT: 'Braille → Teks',
+                dirDots: 'Nomor Titik → Braille / Teks',
+                inputPanelTitle: 'Sumber',
+                outputPanelTitle: 'Terjemahan',
+                unicodeLabel: 'Braille Unicode',
+                dotsLabel: 'Notasi Titik',
+                visualLabel: 'Sel Visual',
+                clearBtnText: 'Hapus',
+                uploadBtnText: 'Unggah .txt',
+                pasteBtnText: 'Tempel',
+                copyAllBtnText: 'Salin semua',
+                autoScrollLabel: 'Gulir otomatis',
+                privateLabel: 'Privat & Aman',
+                privateSub: 'Semua pemrosesan terjadi di browser Anda',
+                supportsLangs: 'Mendukung 70+ bahasa dan aksara',
+                kbdShortcuts: 'Pintasan Keyboard',
+                helpLabel: 'Bantuan',
+                copiedBtn: 'Disalin ✓',
+                captionTB: 'Masukkan teks biasa. Huruf kapital ditangani otomatis.',
+                captionBT: 'Tempel karakter Braille Unicode.',
+                captionDots: 'Masukkan nomor titik dipisah spasi.',
+                placeholder: '—',
+                charCount: 'Jumlah karakter: ',
+                wordCount: 'Jumlah kata: ',
+                brailleCells: 'Sel Braille: ',
+                characters: 'Karakter: ',
+                charsPlural: ' karakter'
+            }
+        };
+
+        class App {
+            constructor() {
+                this.lang = navigator.language.startsWith('id') ? 'id' : 'en';
+                this.mode = 'tb';
+                this.activeTab = 'unicode';
+                this.init();
+            }
+
+            init() {
+                const el = id => document.getElementById(id);
+                el('language').onchange = e => this.setLang(e.target.value);
+                el('theme').onchange = e => this.setTheme(e.target.value);
+                el('inputArea').oninput = () => this.update();
+                el('script').onchange = () => this.update();
+                el('clearBtn').onclick = () => { el('inputArea').value = ''; this.update(); };
+                el('pasteBtn').onclick = async () => { try { el('inputArea').value = await navigator.clipboard.readText(); this.update(); } catch(e){} };
+                el('copyAllBtn').onclick = () => {
+                    const out = document.querySelector('.output-display:not(.hidden)');
+                    if(!out) return;
+                    navigator.clipboard.writeText(out.innerText).then(()=>{
+                        const b = el('copyAllBtnText');
+                        const old = b.innerText; b.innerText = text[this.lang].copiedBtn;
+                        setTimeout(()=>b.innerText = old, 1500);
+                    });
+                };
+                el('uploadBtn').onclick = () => {
+                    const inp = document.createElement('input'); inp.type = 'file'; inp.accept = '.txt';
+                    inp.onchange = e => {
+                        const f = e.target.files[0]; const r = new FileReader();
+                        r.onload = () => { el('inputArea').value = r.result; this.update(); };
+                        r.readAsText(f);
+                    };
+                    inp.click();
+                };
+                this.setLang(this.lang);
+                this.setTheme('auto');
+            }
+
+            setMode(m) {
+                this.mode = m;
+                document.querySelectorAll('.mode-btn').forEach(b => b.classList.remove('active'));
+                if(m==='tb') document.getElementById('btnTB').classList.add('active');
+                if(m==='bt') document.getElementById('btnBT').classList.add('active');
+                if(m==='dots') document.getElementById('btnDots').classList.add('active');
+                this.update();
+            }
+
+            swap() {
+                if(this.mode === 'dots') return;
+                const el = id => document.getElementById(id);
+                const area = el('inputArea');
+                const script = el('script').value;
+                const currentInput = area.value;
+                let nextInput = "";
+
+                if(this.mode === 'tb') {
+                    const cells = textToBraille(currentInput, script);
+                    nextInput = cells.map(c => c.braille).join('');
+                    this.mode = 'bt';
+                } else {
+                    nextInput = brailleToText(currentInput, script);
+                    this.mode = 'tb';
+                }
+
+                area.value = nextInput;
+                this.setMode(this.mode);
+            }
+
+            setTab(t) {
+                this.activeTab = t;
+                document.querySelectorAll('.tab').forEach(b => b.classList.remove('active'));
+                document.getElementById(t+'Label').classList.add('active');
+                this.updateVisibility();
+            }
+
+            update() {
+                const input = document.getElementById('inputArea').value;
+                const script = document.getElementById('script').value;
+                const uniOut = document.getElementById('unicodeOutput');
+                const dotsOut = document.getElementById('dotsOutput');
+                const textOut = document.getElementById('textOutput');
+                const visOut = document.getElementById('visualOutput');
+
+                let cells = [];
+                if(this.mode === 'tb') {
+                    cells = textToBraille(input, script);
+                    uniOut.innerText = cells.map(c=>c.braille).join('');
+                    dotsOut.innerText = cells.map(c=>c.isSpace ? '0' : (charToDots(c.braille).join('') || '0')).join(' ');
+                } else if(this.mode === 'bt') {
+                    textOut.innerText = brailleToText(input, script);
+                    for(const ch of input) {
+                        if(ch >= '\u2800' && ch <= '\u28FF') cells.push({braille:ch, source:'?'});
+                        else if(ch === ' ') cells.push({braille:BLANK, isSpace:true});
+                    }
+                } else {
+                    const tokens = input.trim().split(/\s+/);
+                    for(const t of tokens) {
+                        if(!t) continue;
+                        const b = String.fromCharCode(0x2800 + [...new Set([...t].map(Number))].reduce((s,x)=>s+(1<<(x-1)),0));
+                        cells.push({braille:b, source:t});
+                    }
+                    const uni = cells.map(c=>c.braille).join('');
+                    uniOut.innerText = uni;
+                    textOut.innerText = brailleToText(uni, script);
+                }
+
+                this.renderVisual(cells);
+                this.updateStats(input, cells);
+                this.updateVisibility();
+
+                const capKey = this.mode === 'tb' ? 'captionTB' : (this.mode === 'bt' ? 'captionBT' : 'captionDots');
+                document.getElementById('inputCaption').innerText = text[this.lang][capKey];
+            }
+
+            renderVisual(cells) {
+                const wrap = document.getElementById('visualOutput');
+                wrap.innerHTML = '';
+                cells.forEach(c => {
+                    if(c.isSpace) { wrap.innerHTML += '<div style="width:20px"></div>'; return; }
+                    const dots = charToDots(c.braille);
+                    let dotsHtml = '';
+                    [1,4,2,5,3,6].forEach(p => {
+                        dotsHtml += `<div class="dot ${dots.includes(p)?'on':''}"></div>`;
+                    });
+                    wrap.innerHTML += `
+                        <div class="cell-unit">
+                            <div class="cell-dots">${dotsHtml}</div>
+                            <div class="cell-label">${c.source||''}</div>
+                        </div>
+                    `;
+                });
+            }
+
+            updateStats(input, cells) {
+                const t = text[this.lang];
+                document.getElementById('topCount').innerText = input.length + t.charsPlural;
+                document.getElementById('sourceCharCount').innerText = t.charCount + input.length;
+                document.getElementById('sourceWordCount').innerText = t.wordCount + (input.trim() ? input.trim().split(/\s+/).length : 0);
+
+                const cellCount = cells.filter(c=>!c.isSpace).length;
+                document.getElementById('outputCellCount').innerText = t.brailleCells + cellCount;
+
+                let charCount = 0;
+                if(this.mode === 'tb') {
+                    charCount = input.length;
+                } else if(this.mode === 'bt') {
+                    charCount = document.getElementById('textOutput').innerText.length;
+                } else {
+                    charCount = document.getElementById('textOutput').innerText.length;
+                }
+                document.getElementById('outputCharCount').innerText = t.characters + charCount;
+            }
+
+            updateVisibility() {
+                const el = id => document.getElementById(id);
+                ['unicodeOutput', 'dotsOutput', 'textOutput', 'visualOutput'].forEach(id => el(id).classList.add('hidden'));
+
+                if(this.mode === 'bt') {
+                    el('textOutput').classList.remove('hidden');
+                    document.querySelector('.tabs').classList.add('hidden');
+                } else {
+                    document.querySelector('.tabs').classList.remove('hidden');
+                    if(this.activeTab === 'unicode') el('unicodeOutput').classList.remove('hidden');
+                    if(this.activeTab === 'dots') el('dotsOutput').classList.remove('hidden');
+                    if(this.activeTab === 'visual') el('visualOutput').classList.remove('hidden');
+
+                    if(this.mode === 'dots') el('textOutput').classList.remove('hidden');
+                }
+            }
+
+            setLang(l) {
+                this.lang = l;
+                document.documentElement.lang = l;
+                document.getElementById('language').value = l;
+                const keys = Object.keys(text.en);
+                keys.forEach(k => {
+                    const node = document.getElementById(k);
+                    if(node) node.innerText = text[l][k] || text.en[k];
+                });
+                this.update();
+            }
+
+            setTheme(t) {
+                document.documentElement.className = t === 'auto' ? '' : t;
+            }
+        }
+
+        window.app = new App();
+    </script>
+</body>
 </html>

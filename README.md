@@ -12,9 +12,9 @@ The interface supports both English and Bahasa Indonesia.
 
 ## How It Works
 
-The converter works by mapping characters from various scripts to their corresponding Braille patterns based on international standards for Grade 1 (uncontracted) Braille.
+The converter works by mapping characters from various scripts to their corresponding Braille patterns based on international standards for Grade 1 (uncontracted) Braille. It supports both Left-to-Right (LTR) and Right-to-Left (RTL) source scripts, though Braille itself is always rendered LTR.
 
-1.  **Text to Braille**: Converts plain text into Braille Unicode (e.g., ⠓⠑⠇⠇⠕) and dot notation (e.g., 125 15 123 123 135). It automatically handles capital letters using the capital sign ⠠ (dot 6) and numbers using the number sign ⠼ (dots 3-4-5-6).
+1.  **Text to Braille**: Converts plain text into Braille Unicode (e.g., ⠓⠑⠇⠇⠕) and dot notation (e.g., 125 15 123 123 135). It automatically handles capital letters using the capital sign ⠠ (dot 6) and numbers using the number sign ⠼ (dots 3-4-5-6). It supports Eastern Arabic (٠-٩) and Persian (۰-۹) digits, as well as Vietnamese tone marks.
 2.  **Braille to Text**: Decodes Braille Unicode characters back into readable text, recognizing capital and number indicators.
 3.  **Dot Numbers to Braille/Text**: Allows users to input specific dot combinations (e.g., "12" for ⠃) to generate Braille characters and their corresponding text.
 
@@ -27,7 +27,7 @@ The converter works by mapping characters from various scripts to their correspo
 
 ## Key Features
 
-*   **Multi-language Support**: Supports English, French, German, Spanish, Portuguese, Italian, Indonesian, and Russian.
+*   **Multi-language Support**: Supports over 70 languages and scripts, including Akan, Amharic, Arabic, Azerbaijani, Belarusian, Bengali, Bulgarian, Burmese, Catalan, Danish, Dzongkha, Dutch, English, Esperanto, Estonian, Faroese, Filipino, Finnish, French, Gaelic, German, Greek, Greenlandic, Guaraní, Gujarati, Hausa, Hawaiian, Hebrew, Hindi, Icelandic, Igbo, Indonesian, Inuktitut, Irish, Italian, Kannada, Kazakh, Khmer, Korean, Kyrgyz, Lao, Latvian, Lithuanian, Luxembourgish, Malayalam, Maltese, Māori, Mongolian, Navajo, Norwegian, Odia, Persian, Polish, Portuguese, Punjabi, Romanian, Russian, Samoan, Sinhala, Slovak, Spanish, Swedish, Tamil, Tatar, Telugu, Thai, Tibetan, Turkish, Ukrainian, Urdu (India/Pakistan), Vietnamese, Welsh, and Yoruba.
 *   **Multiple Modes**: Text → Braille, Braille → Text, and Dot Numbers → Braille/Text.
 *   **Grade 1 Braille**: Focuses on uncontracted Braille for clarity and standard compliance.
 *   **Visual Cell Preview**: Optional visual representation of Braille cells with dot numbering.
