@@ -1,0 +1,1106 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<meta charset="UTF-8">
+		<meta name="viewport" content="width=device-width,initial-scale=1">
+		<title>Braille Converter</title>
+		<style>
+			:root {
+				--primary: #005dac;
+				--on-primary: #ffffff;
+				--hover: #00539a;
+				--background: #f9f9ff;
+				--surface: #ffffff;
+				--text: #181c21;
+				--border: #c1c6d4;
+				--muted: #f2f3fc;
+				--success: #0b6b1d;
+				--on-success: #ffffff;
+				--danger: #ba1a1a;
+				--on-danger: #ffffff;
+				--highlight-bg: #d4e3ff;
+			}
+
+			@media (prefers-color-scheme: dark) {
+				:root:not(.light) {
+					--primary: #a5c8ff;
+					--on-primary: #00315f;
+					--hover: #72adff;
+					--background: #101319;
+					--surface: #0b0e14;
+					--text: #e0e2ea;
+					--border: #414752;
+					--muted: #181c21;
+					--success: #82db7e;
+					--on-success: #00390a;
+					--danger: #ffb4ab;
+					--on-danger: #93000a;
+					--highlight-bg: #001c3a;
+				}
+			}
+
+			:root.dark {
+				--primary: #a5c8ff;
+				--on-primary: #00315f;
+				--hover: #72adff;
+				--background: #101319;
+				--surface: #0b0e14;
+				--text: #e0e2ea;
+				--border: #414752;
+				--muted: #181c21;
+				--success: #82db7e;
+				--on-success: #00390a;
+				--danger: #ffb4ab;
+				--on-danger: #93000a;
+				--highlight-bg: #001c3a;
+			}
+
+			* {
+				box-sizing: border-box;
+				margin: 0;
+				padding: 0;
+				outline-offset: 2px;
+			}
+
+			*:focus-visible {
+				outline: 2px solid var(--primary);
+			}
+
+			body {
+				background: var(--background);
+				color: var(--text);
+				font-family: sans-serif;
+				display: flex;
+				justify-content: center;
+				min-height: 100vh;
+				padding: 1rem;
+			}
+
+			.container {
+				background: var(--surface);
+				border: 1px solid var(--border);
+				border-radius: 8px;
+				max-width: 960px;
+				padding: 2rem;
+				width: 100%;
+				position: relative;
+				margin: 2rem 0;
+			}
+
+			.hidden {
+				display: none !important;
+			}
+
+			h1, h2, h3 {
+				margin: .5rem 0;
+			}
+
+			label {
+				display: block;
+				font-weight: 700;
+				margin: .4rem 0 .2rem;
+			}
+
+			input, select, button, textarea {
+				background: var(--surface);
+				border: 1px solid var(--border);
+				border-radius: 4px;
+				color: var(--text);
+				font-size: 1rem;
+				padding: .5rem;
+				width: 100%;
+			}
+
+			textarea {
+				resize: vertical;
+				min-height: 80px;
+			}
+
+			button {
+				cursor: pointer;
+			}
+
+			button:disabled {
+				opacity: .6;
+				cursor: not-allowed;
+			}
+
+			.primary {
+				background: var(--primary);
+				color: var(--on-primary);
+				border: 0;
+			}
+
+			.primary:hover:not(:disabled) {
+				background: var(--hover);
+			}
+
+			.secondary:hover:not(:disabled) {
+				background: var(--muted);
+			}
+
+			.danger {
+				background: var(--danger);
+				color: var(--on-danger);
+				border: 0;
+			}
+
+			.success {
+				background: var(--success);
+				color: var(--on-success);
+				border: 0;
+			}
+
+			.selectors {
+				position: absolute;
+				right: 2rem;
+				top: 1rem;
+				display: flex;
+				gap: 8px;
+			}
+
+			.selectors select {
+				width: auto;
+				font-size: .9rem;
+			}
+
+			.row {
+				display: flex;
+				gap: 1rem;
+				margin-bottom: 1rem;
+			}
+
+			.group {
+				flex: 1;
+			}
+
+			.error {
+				color: var(--danger);
+				font-size: .9rem;
+				margin: 1rem 0;
+				display: block;
+				font-weight: 500;
+			}
+
+			.info {
+				font-size: .9rem;
+				opacity: .8;
+				line-height: 1.6;
+			}
+
+			@media(max-width: 768px) {
+				.selectors {
+					position: static;
+					justify-content: end;
+					margin-bottom: .5rem;
+				}
+
+				.row {
+					flex-direction: column;
+				}
+			}
+
+			.seg {
+				margin: 1.2rem 0 0;
+			}
+
+			.inline-label {
+				font-weight: 700;
+				display: inline;
+				margin: 0;
+			}
+
+			.option-row {
+				display: flex;
+				gap: 12px;
+				flex-wrap: wrap;
+				align-items: center;
+				margin: .6rem 0;
+			}
+
+			.radio-wrap {
+				display: flex;
+				gap: 4px;
+				align-items: center;
+			}
+
+			.radio-wrap input[type=radio] {
+				width: auto;
+				cursor: pointer;
+			}
+
+			.radio-wrap label {
+				font-weight: normal;
+				margin: 0;
+				cursor: pointer;
+			}
+
+			.tag {
+				font-size: .75rem;
+				padding: .15rem .5rem;
+				border-radius: 12px;
+				background: var(--highlight-bg);
+				color: var(--primary);
+				font-weight: 700;
+				white-space: nowrap;
+			}
+
+			.btn-sm {
+				width: auto;
+				padding: .3rem .9rem;
+				font-size: .85rem;
+			}
+
+			.btn-row {
+				display: flex;
+				gap: 8px;
+				margin-top: .7rem;
+				align-items: center;
+			}
+
+			.caption {
+				font-size: .8rem;
+				opacity: .7;
+				margin-top: .25rem;
+				line-height: 1.5;
+			}
+
+			.out-header {
+				display: flex;
+				justify-content: space-between;
+				align-items: center;
+				margin-bottom: .3rem;
+			}
+
+			.out-box {
+				background: var(--muted);
+				border: 1px solid var(--border);
+				border-radius: 4px;
+				padding: .8rem 1rem;
+				min-height: 54px;
+				word-break: break-all;
+			}
+
+			.braille-unicode {
+				font-size: 1.9rem;
+				letter-spacing: 5px;
+				line-height: 2.2;
+			}
+
+			.dots-mono {
+				font-family: monospace;
+				font-size: .9rem;
+				line-height: 1.8;
+			}
+
+			.decoded-text {
+				font-size: 1.1rem;
+				line-height: 1.8;
+			}
+
+			.placeholder-text {
+				opacity: .45;
+				font-style: italic;
+				font-size: .9rem;
+			}
+
+			.cells-wrap {
+				display: flex;
+				flex-wrap: wrap;
+				gap: 7px;
+				padding: .8rem;
+				align-items: flex-end;
+			}
+
+			.cell-item {
+				display: flex;
+				flex-direction: column;
+				align-items: center;
+				gap: 2px;
+			}
+
+			.cell-grid {
+				display: grid;
+				grid-template-columns: 1fr 1fr;
+				grid-template-rows: 1fr 1fr 1fr;
+				gap: 3px;
+				background: var(--surface);
+				border: 1px solid var(--border);
+				border-radius: 3px;
+				padding: 4px;
+			}
+
+			.cdot {
+				width: 9px;
+				height: 9px;
+				border-radius: 50%;
+				background: var(--border);
+			}
+
+			.cdot.on {
+				background: var(--primary);
+			}
+
+			.cell-lbl {
+				font-size: .62rem;
+				opacity: .75;
+				max-width: 30px;
+				text-align: center;
+				overflow: hidden;
+				white-space: nowrap;
+				line-height: 1.3;
+			}
+
+			.cell-spacer {
+				width: 10px;
+			}
+
+			.divider {
+				border: 0;
+				border-top: 1px solid var(--border);
+				margin: 1.2rem 0 .8rem;
+			}
+
+			select#script {
+				width: auto;
+				min-width: 200px;
+			}
+		</style>
+	</head>
+	<body>
+		<div class="container">
+			<div class="selectors">
+				<select id="language">
+					<option value="en">English</option>
+					<option value="id">Bahasa Indonesia</option>
+				</select>
+				<select id="theme">
+					<option value="auto">Auto</option>
+					<option value="light">Light</option>
+					<option value="dark">Dark</option>
+				</select>
+			</div>
+			<h1 id="title"></h1>
+			<p id="subtitle" class="info" style="margin-top:.25rem"></p>
+			<div class="seg">
+				<div class="option-row">
+					<label class="inline-label" id="scriptLabel" for="script"></label>
+					<select id="script">
+						<option value="en">English</option>
+						<option value="fr">Français (French)</option>
+						<option value="de">Deutsch (German)</option>
+						<option value="es">Español (Spanish)</option>
+						<option value="pt">Português (Portuguese)</option>
+						<option value="it">Italiano (Italian)</option>
+						<option value="id2">Indonesian / Malay</option>
+						<option value="ru">Русский (Russian)</option>
+					</select>
+					<span class="tag" id="gradeTag"></span>
+				</div>
+				<div class="option-row" style="margin-top:.5rem">
+					<label class="inline-label" id="dirLabel"></label>
+					<div class="radio-wrap">
+						<input type="radio" name="dir" id="dirTBr" value="tb" checked>
+						<label for="dirTBr" id="dirTB"></label>
+					</div>
+					<div class="radio-wrap">
+						<input type="radio" name="dir" id="dirBTr" value="bt">
+						<label for="dirBTr" id="dirBT"></label>
+					</div>
+					<div class="radio-wrap">
+						<input type="radio" name="dir" id="dirDr" value="dots">
+						<label for="dirDr" id="dirDots"></label>
+					</div>
+				</div>
+			</div>
+			<div class="seg">
+				<label id="inputLabel" for="inputArea"></label>
+				<textarea id="inputArea" rows="4" spellcheck="false"></textarea>
+				<div id="inputCaption" class="caption"></div>
+			</div>
+			<div class="btn-row">
+				<button class="primary btn-sm" id="convertBtn" style="padding:.45rem 1.4rem;font-size:1rem"></button>
+				<button class="secondary btn-sm" id="clearBtn"></button>
+			</div>
+			<hr class="divider">
+			<div id="outputSection">
+				<div id="unicodeSection" class="seg">
+					<div class="out-header">
+						<label id="unicodeLabel" style="margin:0"></label>
+						<button class="secondary btn-sm" id="copyUnicode"></button>
+					</div>
+					<div class="out-box braille-unicode" id="unicodeOutput">
+						<span class="placeholder-text" id="placeholderUni"></span>
+					</div>
+				</div>
+				<div id="dotsSection" class="seg">
+					<div class="out-header">
+						<label id="dotsLabel" style="margin:0"></label>
+						<button class="secondary btn-sm" id="copyDots"></button>
+					</div>
+					<div class="out-box dots-mono" id="dotsOutput">
+						<span class="placeholder-text" id="placeholderDots"></span>
+					</div>
+				</div>
+				<div id="textSection" class="seg">
+					<div class="out-header">
+						<label id="textOutLabel" style="margin:0"></label>
+						<button class="secondary btn-sm" id="copyText"></button>
+					</div>
+					<div class="out-box decoded-text" id="textOutput">
+						<span class="placeholder-text" id="placeholderText"></span>
+					</div>
+				</div>
+				<div class="seg">
+					<div style="display:flex;justify-content:space-between;align-items:center">
+						<label id="visualLabel" style="margin:0"></label>
+						<label style="font-weight:normal;display:flex;align-items:center;gap:6px;cursor:pointer;margin:0">
+							<input type="checkbox" id="showVisual" style="width:auto">
+							<span id="showVisualLabel"></span>
+						</label>
+					</div>
+					<div class="out-box cells-wrap" id="visualOutput" style="display:none;min-height:72px"></div>
+				</div>
+			</div>
+			<p class="info" style="margin-top:1.5rem;border-top:1px solid var(--border);padding-top:.8rem" id="footNote"></p>
+		</div>
+		<script>
+			const text = {
+				en: {
+					title: 'Braille Converter',
+					subtitle: 'Convert text to Braille (Unicode or dot notation) and vice versa. Supports English, French, German, Spanish, Portuguese, Italian, Indonesian, and Russian.',
+					scriptLabel: 'Script:',
+					gradeTag: 'Grade 1 · Uncontracted',
+					dirLabel: 'Mode:',
+					dirTB: 'Text → Braille',
+					dirBT: 'Braille → Text',
+					dirDots: 'Dot Numbers → Braille / Text',
+					inputLabel: 'Input',
+					convertBtn: 'Convert',
+					clearBtn: 'Clear',
+					unicodeLabel: 'Braille Unicode',
+					dotsLabel: 'Dot Notation',
+					textOutLabel: 'Decoded Text',
+					visualLabel: 'Visual Cells',
+					showVisualLabel: 'Show visual cells',
+					copyBtn: 'Copy',
+					copiedBtn: 'Copied ✓',
+					placeholder: '—',
+					footNote: 'Grade 1 (uncontracted) braille only. Capitals are prefixed with the capital sign ⠠ (dot 6). Numbers are prefixed with the number sign ⠼ (dots 3-4-5-6). Dot notation format: space-separated cells, each cell listed as its raised dot numbers (e.g. 125 for ⠓ h); use 0 for a blank/space cell. Russian uses phonetic-correspondence mapping per the international standard (в→⠺, ц→⠉, ч→⠟, щ→⠭).',
+					captionTB: 'Enter plain text. Capitals are handled automatically.',
+					captionBT: 'Paste Braille Unicode characters (e.g. ⠓⠑⠇⠇⠕).',
+					captionDots: 'Enter space-separated dot cells. Use digit strings per cell (e.g. "125 15 123 123 135"), and 0 for blank. Optionally prefix cap sign: "6 125 = ⠠H".',
+					autoTheme: 'Auto',
+					lightTheme: 'Light',
+					darkTheme: 'Dark',
+				},
+				id: {
+					title: 'Konverter Braille',
+					subtitle: 'Konversi teks ke Braille (Unicode atau notasi titik) dan sebaliknya. Mendukung Inggris, Prancis, Jerman, Spanyol, Portugis, Italia, Indonesia, dan Rusia.',
+					scriptLabel: 'Aksara:',
+					gradeTag: 'Kelas 1 · Tidak Disingkat',
+					dirLabel: 'Mode:',
+					dirTB: 'Teks → Braille',
+					dirBT: 'Braille → Teks',
+					dirDots: 'Nomor Titik → Braille / Teks',
+					inputLabel: 'Masukan',
+					convertBtn: 'Konversi',
+					clearBtn: 'Hapus',
+					unicodeLabel: 'Braille Unicode',
+					dotsLabel: 'Notasi Titik',
+					textOutLabel: 'Teks Terdekode',
+					visualLabel: 'Sel Visual',
+					showVisualLabel: 'Tampilkan sel visual',
+					copyBtn: 'Salin',
+					copiedBtn: 'Disalin ✓',
+					placeholder: '—',
+					footNote: 'Hanya braille kelas 1 (tidak disingkat). Huruf kapital diawali tanda kapital ⠠ (titik 6). Angka diawali tanda angka ⠼ (titik 3-4-5-6). Format notasi titik: sel dipisah spasi, tiap sel adalah string angka titik yang raised (mis. 125 untuk ⠓ h); gunakan 0 untuk sel kosong/spasi. Bahasa Rusia menggunakan pemetaan korespondensi fonetik.',
+					captionTB: 'Masukkan teks biasa. Huruf kapital ditangani otomatis.',
+					captionBT: 'Tempel karakter Braille Unicode (mis. ⠓⠑⠇⠇⠕).',
+					captionDots: 'Masukkan sel titik dipisah spasi. Gunakan string digit per sel (mis. "125 15 123 123 135"), dan 0 untuk kosong.',
+					autoTheme: 'Otomatis',
+					lightTheme: 'Terang',
+					darkTheme: 'Gelap',
+				}
+			};
+
+			const d = (...dots)=>String.fromCharCode(0x2800 + dots.reduce((s,x)=>s + (1 << (x - 1)), 0));
+
+			const BLANK = '\u2800';
+			const NUM_SIGN = d(3, 4, 5, 6);
+			const CAP_SIGN = d(6);
+
+			function charToDots(ch) {
+				const n = ch.charCodeAt(0) - 0x2800;
+				if (n < 0 || n > 63)
+					return [];
+				return [1, 2, 3, 4, 5, 6].filter(b=>n & (1 << (b - 1)));
+			}
+
+			const BASE = {
+				a: d(1),
+				b: d(1, 2),
+				c: d(1, 4),
+				d: d(1, 4, 5),
+				e: d(1, 5),
+				f: d(1, 2, 4),
+				g: d(1, 2, 4, 5),
+				h: d(1, 2, 5),
+				i: d(2, 4),
+				j: d(2, 4, 5),
+				k: d(1, 3),
+				l: d(1, 2, 3),
+				m: d(1, 3, 4),
+				n: d(1, 3, 4, 5),
+				o: d(1, 3, 5),
+				p: d(1, 2, 3, 4),
+				q: d(1, 2, 3, 4, 5),
+				r: d(1, 2, 3, 5),
+				s: d(2, 3, 4),
+				t: d(2, 3, 4, 5),
+				u: d(1, 3, 6),
+				v: d(1, 2, 3, 6),
+				w: d(2, 4, 5, 6),
+				x: d(1, 3, 4, 6),
+				y: d(1, 3, 4, 5, 6),
+				z: d(1, 3, 5, 6)
+			};
+
+			const DIGITS = {
+				'1': d(1),
+				'2': d(1, 2),
+				'3': d(1, 4),
+				'4': d(1, 4, 5),
+				'5': d(1, 5),
+				'6': d(1, 2, 4),
+				'7': d(1, 2, 4, 5),
+				'8': d(1, 2, 5),
+				'9': d(2, 4),
+				'0': d(2, 4, 5)
+			};
+
+			const PUNCT = {
+				',': d(2),
+				';': d(2, 3),
+				':': d(2, 5),
+				'.': d(2, 5, 6),
+				'!': d(2, 3, 5),
+				'?': d(2, 3, 6),
+				"'": d(3),
+				'-': d(3, 6),
+				'(': d(1, 2, 3, 5, 6),
+				')': d(2, 3, 4, 5, 6),
+				'"': d(2, 3, 5, 6),
+				'«': d(2, 3, 5, 6),
+				'»': d(2, 3, 5, 6)
+			};
+
+			const SCRIPTS = {
+				en: {
+					name: 'English',
+					letters: {
+						...BASE
+					}
+				},
+				id2: {
+					name: 'Indonesian / Malay',
+					letters: {
+						...BASE
+					}
+				},
+				fr: {
+					name: 'Français',
+					letters: {
+						...BASE,
+						'à': d(1, 2, 3, 5, 6),
+						'â': d(1, 6),
+						'ç': d(1, 2, 3, 4, 6),
+						'è': d(2, 3, 4, 6),
+						'é': d(1, 2, 3, 4, 5, 6),
+						'ê': d(1, 2, 6),
+						'ë': d(1, 2, 4, 6),
+						'î': d(1, 4, 6),
+						'ï': d(1, 2, 4, 5, 6),
+						'ô': d(1, 4, 5, 6),
+						'ù': d(2, 3, 4, 5, 6),
+						'û': d(1, 5, 6),
+						'ü': d(1, 2, 5, 6),
+						'œ': d(2, 4, 6),
+						'æ': d(3, 4, 5),
+					}
+				},
+				de: {
+					name: 'Deutsch',
+					letters: {
+						...BASE,
+						'ä': d(3, 4, 5),
+						'ö': d(2, 4, 6),
+						'ü': d(1, 2, 5, 6),
+						'ß': d(2, 3)
+					}
+				},
+				es: {
+					name: 'Español',
+					letters: {
+						...BASE,
+						'á': d(1, 2, 3, 5, 6),
+						'é': d(1, 2, 3, 4, 5, 6),
+						'í': d(3, 4),
+						'ó': d(3, 4, 6),
+						'ú': d(2, 3, 4),
+						'ü': d(1, 2, 5, 6),
+						'ñ': d(1, 2, 4, 5, 6)
+					}
+				},
+				pt: {
+					name: 'Português',
+					letters: {
+						...BASE,
+						'á': d(1, 2, 3, 5, 6),
+						'â': d(1, 6),
+						'ã': d(3, 4, 5),
+						'à': d(1, 2, 3, 5, 6),
+						'ç': d(1, 2, 3, 4, 6),
+						'é': d(1, 2, 3, 4, 5, 6),
+						'ê': d(1, 2, 6),
+						'í': d(3, 4),
+						'ó': d(3, 4, 6),
+						'ô': d(1, 4, 5, 6),
+						'õ': d(2, 4, 6),
+						'ú': d(2, 3, 4)
+					}
+				},
+				it: {
+					name: 'Italiano',
+					letters: {
+						...BASE,
+						'à': d(1, 2, 3, 5, 6),
+						'è': d(2, 3, 4, 6),
+						'é': d(1, 2, 3, 4, 5, 6),
+						'ì': d(3, 4),
+						'î': d(1, 4, 6),
+						'ò': d(3, 4, 6),
+						'ó': d(1, 3, 4, 6),
+						'ù': d(2, 3, 4, 5, 6),
+						'û': d(1, 5, 6)
+					}
+				},
+				ru: {
+					name: 'Русский',
+					letters: {
+						'а': d(1),
+						'б': d(1, 2),
+						'в': d(2, 4, 5, 6),
+						'г': d(1, 2, 4, 5),
+						'д': d(1, 4, 5),
+						'е': d(1, 5),
+						'ё': d(1, 6),
+						'ж': d(2, 4, 5),
+						'з': d(1, 3, 5, 6),
+						'и': d(2, 4),
+						'й': d(1, 2, 3, 4, 6),
+						'к': d(1, 3),
+						'л': d(1, 2, 3),
+						'м': d(1, 3, 4),
+						'н': d(1, 3, 4, 5),
+						'о': d(1, 3, 5),
+						'п': d(1, 2, 3, 4),
+						'р': d(1, 2, 3, 5),
+						'с': d(2, 3, 4),
+						'т': d(2, 3, 4, 5),
+						'у': d(1, 3, 6),
+						'ф': d(1, 2, 4),
+						'х': d(1, 2, 5),
+						'ц': d(1, 4),
+						'ч': d(1, 2, 3, 4, 5),
+						'ш': d(1, 5, 6),
+						'щ': d(1, 3, 4, 6),
+						'ъ': d(1, 2, 3, 5, 6),
+						'ы': d(2, 3, 4, 6),
+						'ь': d(2, 3, 4, 5, 6),
+						'э': d(2, 4, 6),
+						'ю': d(1, 2, 5, 6),
+						'я': d(1, 2, 4, 6)
+					}
+				}
+			};
+
+			function buildRevMap(scriptKey) {
+				const letters = (SCRIPTS[scriptKey] || SCRIPTS.en).letters;
+				const revLetters = {}
+				  , revDigits = {}
+				  , revPunct = {};
+				for (const [k,v] of Object.entries(letters))
+					revLetters[v] = k;
+				for (const [k,v] of Object.entries(DIGITS))
+					revDigits[v] = k;
+				for (const [k,v] of Object.entries(PUNCT))
+					revPunct[v] = k;
+				return {
+					revLetters,
+					revDigits,
+					revPunct
+				};
+			}
+
+			function textToBraille(text, scriptKey) {
+				const letters = (SCRIPTS[scriptKey] || SCRIPTS.en).letters;
+				const cells = [];
+				let inNum = false;
+
+				for (const ch of text) {
+					if (ch === '\n' || ch === '\r') {
+						inNum = false;
+						cells.push({
+							braille: BLANK,
+							source: '↵',
+							isSpace: true
+						});
+						continue;
+					}
+					if (ch === ' ' || ch === '\t') {
+						inNum = false;
+						cells.push({
+							braille: BLANK,
+							source: ' ',
+							isSpace: true
+						});
+						continue;
+					}
+
+					if (/[0-9]/.test(ch)) {
+						if (!inNum) {
+							cells.push({
+								braille: NUM_SIGN,
+								source: '⠼',
+								isPrefix: true
+							});
+							inNum = true;
+						}
+						cells.push({
+							braille: DIGITS[ch],
+							source: ch
+						});
+						continue;
+					}
+					inNum = false;
+
+					const isUpper = (ch >= 'A' && ch <= 'Z') || (ch >= '\u0410' && ch <= '\u042F') || ch === '\u0401';
+					const lower = ch.toLowerCase();
+
+					if (letters[lower]) {
+						if (isUpper)
+							cells.push({
+								braille: CAP_SIGN,
+								source: '⠠',
+								isPrefix: true
+							});
+						cells.push({
+							braille: letters[lower],
+							source: lower
+						});
+						continue;
+					}
+					if (PUNCT[ch]) {
+						cells.push({
+							braille: PUNCT[ch],
+							source: ch
+						});
+						continue;
+					}
+				}
+				return cells;
+			}
+
+			function brailleToText(input, scriptKey) {
+				const {revLetters, revDigits, revPunct} = buildRevMap(scriptKey);
+				let result = '';
+				let capNext = false
+				  , inNum = false;
+
+				for (const ch of input) {
+					if (ch === ' ' || ch === BLANK) {
+						result += ' ';
+						inNum = false;
+						continue;
+					}
+					if (ch === CAP_SIGN) {
+						capNext = true;
+						continue;
+					}
+					if (ch === NUM_SIGN) {
+						inNum = true;
+						continue;
+					}
+
+					if (inNum) {
+						const digit = revDigits[ch];
+						if (digit !== undefined) {
+							result += digit;
+							continue;
+						}
+						inNum = false;
+					}
+
+					const letter = revLetters[ch];
+					if (letter !== undefined) {
+						result += capNext ? letter.toUpperCase() : letter;
+						capNext = false;
+						continue;
+					}
+					const punct = revPunct[ch];
+					if (punct !== undefined) {
+						result += punct;
+						capNext = false;
+						continue;
+					}
+
+					result += '?';
+					capNext = false;
+				}
+				return result;
+			}
+
+			function dotsToBraille(input) {
+				const cells = [];
+				const tokens = input.trim().split(/\s+/);
+				for (let t = 0; t < tokens.length; t++) {
+					const tok = tokens[t];
+					if (!tok)
+						continue;
+					if (tok === '0' || tok === '_') {
+						cells.push({
+							braille: BLANK,
+							source: '⎵',
+							isSpace: true
+						});
+						continue;
+					}
+					const dotNums = [...tok].map(Number).filter(n=>n >= 1 && n <= 6);
+					const unique = [...new Set(dotNums)].sort((a,b)=>a - b);
+					const bChar = unique.length ? String.fromCharCode(0x2800 + unique.reduce((s,x)=>s + (1 << (x - 1)), 0)) : BLANK;
+					cells.push({
+						braille: bChar,
+						source: unique.join('') || '?'
+					});
+				}
+				return cells;
+			}
+
+			const cellsToUnicode = cells=>cells.map(c=>c.braille).join('');
+
+			function cellsToDotsStr(cells) {
+				return cells.map(c=>{
+					if (c.isSpace)
+						return '0';
+					const dots = charToDots(c.braille);
+					return dots.length ? dots.join('') : '0';
+				}
+				).join(' ');
+			}
+
+			const el = new Proxy({},{
+				get: (_,id)=>document.getElementById(id)
+			});
+
+			class BrailleConverter {
+				constructor() {
+					this.uiLang = navigator.language?.startsWith('id') ? 'id' : 'en';
+					this._setup();
+					this._theme('auto');
+					this._lang(this.uiLang);
+				}
+
+				_setup() {
+					el.language.onchange = e=>this._lang(e.target.value);
+					el.theme.onchange = e=>this._theme(e.target.value);
+					el.convertBtn.onclick = ()=>this._convert();
+					el.clearBtn.onclick = ()=>this._clear();
+					el.showVisual.onchange = ()=>this._toggleVisual();
+					el.inputArea.addEventListener('input', ()=>this._updateCaption());
+					document.querySelectorAll('input[name=dir]').forEach(r=>r.onchange = ()=>this._onDirChange());
+					el.inputArea.addEventListener('keydown', e=>{
+						if (e.key === 'Enter' && e.ctrlKey)
+							this._convert();
+					}
+					);
+
+					this._setupCopy('copyUnicode', 'unicodeOutput');
+					this._setupCopy('copyDots', 'dotsOutput');
+					this._setupCopy('copyText', 'textOutput');
+				}
+
+				_setupCopy(btnId, srcId) {
+					document.getElementById(btnId).onclick = ()=>{
+						const content = document.getElementById(srcId).textContent;
+						navigator.clipboard?.writeText(content).then(()=>{
+							const btn = document.getElementById(btnId);
+							const orig = btn.textContent;
+							btn.textContent = this._s('copiedBtn');
+							setTimeout(()=>btn.textContent = orig, 1600);
+						}
+						);
+					}
+					;
+				}
+
+				_dir() {
+					return document.querySelector('input[name=dir]:checked')?.value || 'tb';
+				}
+				_script() {
+					return el.script.value;
+				}
+				_s(key) {
+					return text[this.uiLang]?.[key] ?? text.en[key] ?? key;
+				}
+
+				_convert() {
+					const dir = this._dir();
+					const script = this._script();
+					const input = el.inputArea.value;
+
+					el.unicodeOutput.textContent = '';
+					el.dotsOutput.textContent = '';
+					el.textOutput.textContent = '';
+					el.visualOutput.innerHTML = '';
+
+					let cells = [];
+
+					if (dir === 'tb') {
+						cells = textToBraille(input, script);
+						const uni = cellsToUnicode(cells);
+						const dots = cellsToDotsStr(cells);
+						el.unicodeOutput.textContent = uni || this._s('placeholder');
+						el.dotsOutput.textContent = dots || this._s('placeholder');
+						el.unicodeSection.style.display = '';
+						el.dotsSection.style.display = '';
+						el.textSection.style.display = 'none';
+
+					} else if (dir === 'bt') {
+						for (const ch of input) {
+							if (ch === ' ')
+								cells.push({
+									braille: BLANK,
+									source: ' ',
+									isSpace: true
+								});
+							else if (ch >= '\u2800' && ch <= '\u28FF')
+								cells.push({
+									braille: ch,
+									source: ch
+								});
+						}
+						const decoded = brailleToText(input, script);
+						el.textOutput.textContent = decoded || this._s('placeholder');
+						el.unicodeSection.style.display = 'none';
+						el.dotsSection.style.display = 'none';
+						el.textSection.style.display = '';
+
+					} else {
+						cells = dotsToBraille(input);
+						const uni = cellsToUnicode(cells);
+						const decoded = brailleToText(uni, script);
+						el.unicodeOutput.textContent = uni || this._s('placeholder');
+						el.textOutput.textContent = decoded || this._s('placeholder');
+						el.unicodeSection.style.display = '';
+						el.dotsSection.style.display = 'none';
+						el.textSection.style.display = '';
+					}
+
+					if (el.showVisual.checked)
+						this._renderCells(cells);
+				}
+
+				_renderCells(cells) {
+					const wrap = el.visualOutput;
+					wrap.innerHTML = '';
+					for (const cell of cells) {
+						if (cell.isSpace) {
+							const sp = document.createElement('div');
+							sp.className = 'cell-spacer';
+							wrap.appendChild(sp);
+							continue;
+						}
+						const dots = charToDots(cell.braille);
+						const item = document.createElement('div');
+						item.className = 'cell-item';
+						item.title = `dots: ${dots.length ? dots.join('-') : '(blank)'}\n${cell.source}`;
+
+						const grid = document.createElement('div');
+						grid.className = 'cell-grid';
+						for (const pos of [1, 4, 2, 5, 3, 6]) {
+							const dot = document.createElement('div');
+							dot.className = 'cdot' + (dots.includes(pos) ? ' on' : '');
+							grid.appendChild(dot);
+						}
+
+						const lbl = document.createElement('div');
+						lbl.className = 'cell-lbl';
+						lbl.textContent = cell.source || '';
+
+						item.appendChild(grid);
+						item.appendChild(lbl);
+						wrap.appendChild(item);
+					}
+				}
+
+				_toggleVisual() {
+					el.visualOutput.style.display = el.showVisual.checked ? 'flex' : 'none';
+				}
+
+				_clear() {
+					el.inputArea.value = '';
+					el.unicodeOutput.textContent = '';
+					el.dotsOutput.textContent = '';
+					el.textOutput.textContent = '';
+					el.visualOutput.innerHTML = '';
+				}
+
+				_onDirChange() {
+					this._updateCaption();
+					this._updateSectionVisibility();
+				}
+
+				_updateSectionVisibility() {
+					const dir = this._dir();
+					el.unicodeSection.style.display = (dir === 'bt') ? 'none' : '';
+					el.dotsSection.style.display = (dir === 'bt' || dir === 'dots') ? 'none' : '';
+					el.textSection.style.display = (dir === 'tb') ? 'none' : '';
+				}
+
+				_updateCaption() {
+					const dir = this._dir();
+					el.inputCaption.textContent = this._s('caption' + dir.toUpperCase().replace('DOTS', 'Dots').replace('TB', 'TB').replace('BT', 'BT'));
+					const key = dir === 'tb' ? 'captionTB' : dir === 'bt' ? 'captionBT' : 'captionDots';
+					el.inputCaption.textContent = this._s(key);
+				}
+
+				_theme(t) {
+					document.documentElement.className = t === 'auto' ? '' : t;
+					el.theme.value = t;
+				}
+
+				_lang(lang) {
+					this.uiLang = el.language.value = document.documentElement.lang = lang;
+					Object.keys(text.en).forEach(key=>{
+						const node = document.getElementById(key);
+						if (node)
+							node.textContent = this._s(key);
+					}
+					);
+					[...el.theme.options].forEach(opt=>opt.textContent = this._s(opt.value + 'Theme'));
+					['copyUnicode', 'copyDots', 'copyText'].forEach(id=>{
+						const b = document.getElementById(id);
+						if (b)
+							b.textContent = this._s('copyBtn');
+					}
+					);
+					this._updateCaption();
+					this._updateSectionVisibility();
+				}
+			}
+
+			new BrailleConverter();
+		</script>
+	</body>
+</html>
