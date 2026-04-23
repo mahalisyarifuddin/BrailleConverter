@@ -14,7 +14,7 @@ The interface supports both English and Bahasa Indonesia.
 
 The converter works by mapping characters from various scripts to their corresponding Braille patterns based on international standards for Grade 1 (uncontracted) Braille. It supports both Left-to-Right (LTR) and Right-to-Left (RTL) source scripts, though Braille itself is always rendered LTR.
 
-1.  **Text to Braille**: Converts plain text into Braille Unicode (e.g., ⠓⠑⠇⠇⠕) and dot notation (e.g., 125 15 123 123 135). It automatically handles capital letters using the capital sign ⠠ (dot 6) and numbers using the number sign ⠼ (dots 3-4-5-6). It also supports Eastern Arabic (٠-٩) and Persian (۰-۹) digits.
+1.  **Text to Braille**: Converts plain text into Braille Unicode (e.g., ⠓⠑⠇⠇⠕) and dot notation (e.g., 125 15 123 123 135). It automatically handles capital letters using the capital sign ⠠ (dot 6) and numbers using the number sign ⠼ (dots 3-4-5-6). It supports Eastern Arabic (٠-٩) and Persian (۰-۹) digits, as well as Vietnamese tone marks.
 2.  **Braille to Text**: Decodes Braille Unicode characters back into readable text, recognizing capital and number indicators.
 3.  **Dot Numbers to Braille/Text**: Allows users to input specific dot combinations (e.g., "12" for ⠃) to generate Braille characters and their corresponding text.
 

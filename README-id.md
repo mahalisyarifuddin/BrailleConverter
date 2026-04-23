@@ -14,7 +14,7 @@ Antarmuka mendukung Bahasa Inggris dan Bahasa Indonesia.
 
 Konverter ini bekerja dengan memetakan karakter dari berbagai aksara ke pola Braille yang sesuai berdasarkan standar internasional untuk Braille Kelas 1 (tidak disingkat). Mendukung aksara sumber Kiri-ke-Kanan (LTR) maupun Kanan-ke-Kiri (RTL), meskipun Braille sendiri selalu ditampilkan secara LTR.
 
-1.  **Teks ke Braille**: Mengonversi teks biasa menjadi Braille Unicode (misal: ⠓⠑⠇⠇⠕) dan notasi titik (misal: 125 15 123 123 135). Secara otomatis menangani huruf kapital menggunakan tanda kapital ⠠ (titik 6) dan angka menggunakan tanda angka ⠼ (titik 3-4-5-6). Juga mendukung angka Arab Timur (٠-٩) dan Persia (۰-۹).
+1.  **Teks ke Braille**: Mengonversi teks biasa menjadi Braille Unicode (misal: ⠓⠑⠇⠇⠕) dan notasi titik (misal: 125 15 123 123 135). Secara otomatis menangani huruf kapital menggunakan tanda kapital ⠠ (titik 6) dan angka menggunakan tanda angka ⠼ (titik 3-4-5-6). Juga mendukung angka Arab Timur (٠-٩) dan Persia (۰-۹), serta tanda nada Vietnam.
 2.  **Braille ke Teks**: Mendekode karakter Braille Unicode kembali menjadi teks yang dapat dibaca, mengenali indikator kapital dan angka.
 3.  **Nomor Titik ke Braille/Teks**: Memungkinkan pengguna untuk memasukkan kombinasi titik tertentu (misal: "12" untuk ⠃) untuk menghasilkan karakter Braille dan teks yang sesuai.
 

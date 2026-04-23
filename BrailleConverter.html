@@ -654,7 +654,7 @@
 					copyBtn: 'Copy',
 					copiedBtn: 'Copied ✓',
 					placeholder: '—',
-					footNote: 'Grade 1 (uncontracted) braille only. Capitals are prefixed with the capital sign ⠠ (dot 6). Numbers are prefixed with the number sign ⠼ (dots 3-4-5-6). Dot notation format: space-separated cells, each cell listed as its raised dot numbers (e.g. 125 for ⠓ h); use 0 for a blank/space cell. Supports Eastern Arabic and Persian digits. For RTL scripts like Arabic and Hebrew, Braille remains left-to-right.',
+					footNote: 'Grade 1 (uncontracted) braille only. Capitals are prefixed with the capital sign ⠠ (dot 6). Numbers are prefixed with the number sign ⠼ (dots 3-4-5-6). Dot notation format: space-separated cells, each cell listed as its raised dot numbers (e.g. 125 for ⠓ h); use 0 for a blank/space cell. Supports Eastern Arabic and Persian digits. Vietnamese tone marks are supported as vowel prefixes. For RTL scripts like Arabic and Hebrew, Braille remains left-to-right.',
 					captionTB: 'Enter plain text. Capitals are handled automatically.',
 					captionBT: 'Paste Braille Unicode characters (e.g. ⠓⠑⠇⠇⠕).',
 					captionDots: 'Enter space-separated dot cells. Use digit strings per cell (e.g. "125 15 123 123 135"), and 0 for blank. Optionally prefix cap sign: "6 125 = ⠠H".',
@@ -681,7 +681,7 @@
 					copyBtn: 'Salin',
 					copiedBtn: 'Disalin ✓',
 					placeholder: '—',
-					footNote: 'Hanya braille kelas 1 (tidak disingkat). Huruf kapital diawali tanda kapital ⠠ (titik 6). Angka diawali tanda angka ⠼ (titik 3-4-5-6). Format notasi titik: sel dipisah spasi, tiap sel adalah string angka titik yang raised (mis. 125 untuk ⠓ h); gunakan 0 untuk sel kosong/spasi. Mendukung angka Arab Timur dan Persia. Untuk aksara kanan-ke-kiri seperti Arab dan Ibrani, Braille tetap dibaca kiri-ke-kanan.',
+					footNote: 'Hanya braille kelas 1 (tidak disingkat). Huruf kapital diawali tanda kapital ⠠ (titik 6). Angka diawali tanda angka ⠼ (titik 3-4-5-6). Format notasi titik: sel dipisah spasi, tiap sel adalah string angka titik yang raised (mis. 125 untuk ⠓ h); gunakan 0 untuk sel kosong/spasi. Mendukung angka Arab Timur dan Persia. Tanda nada Vietnam didukung sebagai prefiks vokal. Untuk aksara kanan-ke-kiri seperti Arab dan Ibrani, Braille tetap dibaca kiri-ke-kanan.',
 					captionTB: 'Masukkan teks biasa. Huruf kapital ditangani otomatis.',
 					captionBT: 'Tempel karakter Braille Unicode (mis. ⠓⠑⠇⠇⠕).',
 					captionDots: 'Masukkan sel titik dipisah spasi. Gunakan string digit per sel (mis. "125 15 123 123 135"), dan 0 untuk kosong.',
@@ -1132,7 +1132,7 @@
 						'క': d(1, 3), 'ఖ': d(4, 6), 'గ': d(1, 2, 4, 5), 'ఘ': d(1, 2, 6),
 						'చ': d(1, 4), 'ఛ': d(1, 6), 'జ': d(2, 4, 5), 'ఝ': d(3, 5, 6), 'ఞ': d(2, 5),
 						'ట': d(2, 3, 4, 5, 6), 'ఠ': d(2, 4, 5, 6), 'డ': d(1, 2, 4, 6), 'ఢ': d(1, 2, 3, 4, 5, 6), 'ణ': d(3, 4, 5, 6),
-						'త': d(2, 3, 4, 5), 'థ': d(1, 4, 5, 6), 'द': d(1, 4, 5), 'ध': d(2, 3, 4, 6), 'న': d(1, 3, 4, 5),
+						'త': d(2, 3, 4, 5), 'థ': d(1, 4, 5, 6), 'ద': d(1, 4, 5), 'ధ': d(2, 3, 4, 6), 'న': d(1, 3, 4, 5),
 						'ప': d(1, 2, 3, 4), 'ఫ': d(2, 3, 5), 'బ': d(1, 2), 'భ': d(4, 5), 'మ': d(1, 3, 4),
 						'య': d(1, 3, 4, 5, 6), 'ర': d(1, 2, 3, 5), 'ల': d(1, 2, 3), 'వ': d(1, 2, 3, 6),
 						'శ': d(1, 4, 6), 'ష': d(1, 2, 3, 4, 6), 'స': d(2, 3, 4), 'హ': d(1, 2, 5)
@@ -1143,10 +1143,10 @@
 					letters: {
 						'ಅ': d(1), 'ಆ': d(3, 4, 5), 'ಇ': d(2, 4), 'ಈ': d(3, 5), 'ಉ': d(1, 3, 6), 'ಊ': d(1, 2, 5, 6),
 						'ಎ': d(2, 6), 'ಏ': d(1, 5), 'ಐ': d(3, 4), 'ಒ': d(2, 4, 5, 6), 'ಓ': d(1, 3, 5), 'ಔ': d(2, 4, 6),
-						'ಕ': d(1, 3), 'ಖ': d(4, 6), 'ಗ': d(1, 2, 4, 5), 'घ': d(1, 2, 6),
+						'ಕ': d(1, 3), 'ಖ': d(4, 6), 'ಗ': d(1, 2, 4, 5), 'ಘ': d(1, 2, 6),
 						'ಚ': d(1, 4), 'ಛ': d(1, 6), 'ಜ': d(2, 4, 5), 'ಝ': d(3, 5, 6), 'ಞ': d(2, 5),
 						'ಟ': d(2, 3, 4, 5, 6), 'ಠ': d(2, 4, 5, 6), 'ಡ': d(1, 2, 4, 6), 'ಢ': d(1, 2, 3, 4, 5, 6), 'ಣ': d(3, 4, 5, 6),
-						'ತ': d(2, 3, 4, 5), 'ಥ': d(1, 4, 5, 6), 'ದ': d(1, 4, 5), 'ಧ': d(2, 3, 4, 6), 'న': d(1, 3, 4, 5),
+						'ತ': d(2, 3, 4, 5), 'ಥ': d(1, 4, 5, 6), 'ದ': d(1, 4, 5), 'ಧ': d(2, 3, 4, 6), 'ನ': d(1, 3, 4, 5),
 						'ಪ': d(1, 2, 3, 4), 'ಫ': d(2, 3, 5), 'ಬ': d(1, 2), 'ಭ': d(4, 5), 'ಮ': d(1, 3, 4),
 						'ಯ': d(1, 3, 4, 5, 6), 'ರ': d(1, 2, 3, 5), 'ಲ': d(1, 2, 3), 'ವ': d(1, 2, 3, 6),
 						'ಶ': d(1, 4, 6), 'ಷ': d(1, 2, 3, 4, 6), 'ಸ': d(2, 3, 4), 'ಹ': d(1, 2, 5)
@@ -1158,7 +1158,7 @@
 						'അ': d(1), 'ആ': d(3, 4, 5), 'ഇ': d(2, 4), 'ഈ': d(3, 5), 'ഉ': d(1, 3, 6), 'ഊ': d(1, 2, 5, 6),
 						'എ': d(2, 6), 'ഏ': d(1, 5), 'ഐ': d(3, 4), 'ഒ': d(2, 4, 5, 6), 'ഓ': d(1, 3, 5), 'ഔ': d(2, 4, 6),
 						'ക': d(1, 3), 'ഖ': d(4, 6), 'ഗ': d(1, 2, 4, 5), 'ഘ': d(1, 2, 6),
-						'ച': d(1, 4), 'ഛ': d(1, 6), 'ಜ': d(2, 4, 5), 'ഝ': d(3, 5, 6), 'ഞ': d(2, 5),
+						'ച': d(1, 4), 'ഛ': d(1, 6), 'ജ': d(2, 4, 5), 'ഝ': d(3, 5, 6), 'ഞ': d(2, 5),
 						'ട': d(2, 3, 4, 5, 6), 'ഠ': d(2, 4, 5, 6), 'ഡ': d(1, 2, 4, 6), 'ഢ': d(1, 2, 3, 4, 5, 6), 'ണ': d(3, 4, 5, 6),
 						'ത': d(2, 3, 4, 5), 'ഥ': d(1, 4, 5, 6), 'ദ': d(1, 4, 5), 'ധ': d(2, 3, 4, 6), 'ന': d(1, 3, 4, 5),
 						'പ': d(1, 2, 3, 4), 'ഫ': d(2, 3, 5), 'ബ': d(1, 2), 'ഭ': d(4, 5), 'മ': d(1, 3, 4),
@@ -1171,8 +1171,20 @@
 					name: 'Tiếng Việt (Vietnamese)',
 					letters: {
 						...BASE,
-						'ă': d(3, 4, 5), 'â': d(1, 6), 'đ': d(1, 4, 5), 'ê': d(1, 2, 6), 'ô': d(1, 4, 5, 6),
-						'ơ': d(2, 4, 6), 'ư': d(1, 2, 5, 6)
+						'ă': d(3, 4, 5), 'â': d(1, 6), 'đ': d(2, 3, 4, 6), 'ê': d(1, 2, 6), 'ô': d(1, 4, 5, 6),
+						'ơ': d(2, 4, 6), 'ư': d(1, 2, 5, 6),
+						'á': d(4) + d(1), 'à': d(2) + d(1), 'ả': d(4, 6) + d(1), 'ã': d(3, 6) + d(1), 'ạ': d(6) + d(1),
+						'ắ': d(4) + d(3, 4, 5), 'ằ': d(2) + d(3, 4, 5), 'ẳ': d(4, 6) + d(3, 4, 5), 'ẵ': d(3, 6) + d(3, 4, 5), 'ặ': d(6) + d(3, 4, 5),
+						'ấ': d(4) + d(1, 6), 'ầ': d(2) + d(1, 6), 'ẩ': d(4, 6) + d(1, 6), 'ẫ': d(3, 6) + d(1, 6), 'ậ': d(6) + d(1, 6),
+						'é': d(4) + d(1, 5), 'è': d(2) + d(1, 5), 'ẻ': d(4, 6) + d(1, 5), 'ẽ': d(3, 6) + d(1, 5), 'ẹ': d(6) + d(1, 5),
+						'ế': d(4) + d(1, 2, 6), 'ề': d(2) + d(1, 2, 6), 'ể': d(4, 6) + d(1, 2, 6), 'ễ': d(3, 6) + d(1, 2, 6), 'ệ': d(6) + d(1, 2, 6),
+						'í': d(4) + d(2, 4), 'ì': d(2) + d(2, 4), 'ỉ': d(4, 6) + d(2, 4), 'ĩ': d(3, 6) + d(2, 4), 'ị': d(6) + d(2, 4),
+						'ó': d(4) + d(1, 3, 5), 'ò': d(2) + d(1, 3, 5), 'ỏ': d(4, 6) + d(1, 3, 5), 'õ': d(3, 6) + d(1, 3, 5), 'ọ': d(6) + d(1, 3, 5),
+						'ố': d(4) + d(1, 4, 5, 6), 'ồ': d(2) + d(1, 4, 5, 6), 'ổ': d(4, 6) + d(1, 4, 5, 6), 'ỗ': d(3, 6) + d(1, 4, 5, 6), 'ộ': d(6) + d(1, 4, 5, 6),
+						'ớ': d(4) + d(2, 4, 6), 'ờ': d(2) + d(2, 4, 6), 'ở': d(4, 6) + d(2, 4, 6), 'ỡ': d(3, 6) + d(2, 4, 6), 'ợ': d(6) + d(2, 4, 6),
+						'ú': d(4) + d(1, 3, 6), 'ù': d(2) + d(1, 3, 6), 'ủ': d(4, 6) + d(1, 3, 6), 'ũ': d(3, 6) + d(1, 3, 6), 'ụ': d(6) + d(1, 3, 6),
+						'ứ': d(4) + d(1, 2, 5, 6), 'ừ': d(2) + d(1, 2, 5, 6), 'ử': d(4, 6) + d(1, 2, 5, 6), 'ữ': d(3, 6) + d(1, 2, 5, 6), 'ự': d(6) + d(1, 2, 5, 6),
+						'ý': d(4) + d(1, 3, 4, 5, 6), 'ỳ': d(2) + d(1, 3, 4, 5, 6), 'ỷ': d(4, 6) + d(1, 3, 4, 5, 6), 'ỹ': d(3, 6) + d(1, 3, 4, 5, 6), 'ỵ': d(6) + d(1, 3, 4, 5, 6)
 					}
 				},
 				hy: {
@@ -1274,10 +1286,13 @@
 
 			function textToBraille(text, scriptKey) {
 				const letters = (SCRIPTS[scriptKey] || SCRIPTS.en).letters;
+				const sortedKeys = Object.keys(letters).sort((a,b)=>b.length - a.length);
 				const cells = [];
 				let inNum = false;
+				let i = 0;
 
-				for (const ch of text) {
+				while (i < text.length) {
+					const ch = text[i];
 					if (ch === '\n' || ch === '\r') {
 						inNum = false;
 						cells.push({
@@ -1285,6 +1300,7 @@
 							source: '↵',
 							isSpace: true
 						});
+						i++;
 						continue;
 					}
 					if (ch === ' ' || ch === '\t') {
@@ -1294,6 +1310,7 @@
 							source: ' ',
 							isSpace: true
 						});
+						i++;
 						continue;
 					}
 
@@ -1310,33 +1327,50 @@
 							braille: DIGITS[ch],
 							source: ch
 						});
+						i++;
 						continue;
 					}
 					inNum = false;
 
-					const lower = ch.toLowerCase();
-					const isUpper = ch !== lower;
+					let found = false;
+					for (const key of sortedKeys) {
+						if (text.toLowerCase().startsWith(key, i)) {
+							const source = text.substring(i, i + key.length);
+							const isUpper = source !== key;
 
-					if (letters[lower]) {
-						if (isUpper)
-							cells.push({
-								braille: CAP_SIGN,
-								source: '⠠',
-								isPrefix: true
-							});
-						cells.push({
-							braille: letters[lower],
-							source: lower
-						});
-						continue;
+							if (isUpper) {
+								cells.push({
+									braille: CAP_SIGN,
+									source: '⠠',
+									isPrefix: true
+								});
+							}
+
+							const brailleStr = letters[key];
+							for (const b of brailleStr) {
+								cells.push({
+									braille: b,
+									source: key.length === 1 ? key : source
+								});
+							}
+							i += key.length;
+							found = true;
+							break;
+						}
 					}
+
+					if (found)
+						continue;
+
 					if (PUNCT[ch]) {
 						cells.push({
 							braille: PUNCT[ch],
 							source: ch
 						});
+						i++;
 						continue;
 					}
+					i++;
 				}
 				return cells;
 			}
