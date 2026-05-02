@@ -545,6 +545,7 @@
         function brailleToText(input, scriptKey) {
             const script = SCRIPTS[scriptKey] || SCRIPTS.zm;
             const scriptLetters = script.letters || {};
+            const el = id => document.getElementById(id); // Local helper for DOM access if needed, consistent with swap()
             const revMap = [];
             for (const [char, b] of Object.entries(scriptLetters)) revMap.push({ b, char });
             for (const [char, b] of Object.entries(PUNCT)) revMap.push({ b, char });
@@ -561,6 +562,24 @@
                 if (ch === CAP_SIGN) { capNext = true; i++; continue; }
                 if (ch === NUM_SIGN) { inNum = true; i++; continue; }
                 if (inNum) { const digit = revDigits[ch]; if (digit !== undefined) { result += digit; i++; continue; } inNum = false; }
+
+                // Handle Bharati Braille halant reordering (Halant + Consonant Braille -> Consonant + Halant text)
+                if (script.halantPrefix && script.halantChar && scriptLetters[script.halantChar] && input.startsWith(scriptLetters[script.halantChar], i)) {
+                    const hB = scriptLetters[script.halantChar];
+                    const nextI = i + hB.length;
+                    let nextMatched = false;
+                    // Look ahead for the consonant that should precede the halant in text
+                    for (const { b, char } of uniqueRevMap) {
+                        if (b !== hB && input.startsWith(b, nextI)) {
+                            result += char + script.halantChar;
+                            i = nextI + b.length;
+                            nextMatched = true;
+                            break;
+                        }
+                    }
+                    if (nextMatched) continue;
+                }
+
                 let matched = false;
                 for (const { b, char } of uniqueRevMap) {
                     if (input.startsWith(b, i)) {
