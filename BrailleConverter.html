@@ -555,7 +555,7 @@
             for (const item of revMap) { if (!seen.has(item.b)) { uniqueRevMap.push(item); seen.add(item.b); } }
             uniqueRevMap.sort((a, b) => b.b.length - a.b.length);
             let result = "", i = 0, capNext = false, inNum = false;
-            const revDigits = Object.fromEntries(Object.entries(DIGITS).map(([k, v]) => [v, k]));
+            const revDigits = {"\u281a": "0", "\u2801": "1", "\u2803": "2", "\u2809": "3", "\u2819": "4", "\u2811": "5", "\u280b": "6", "\u281b": "7", "\u2813": "8", "\u280a": "9"};
             while (i < input.length) {
                 const ch = input[i];
                 if (ch === ' ' || ch === BLANK) { result += ' '; inNum = false; i++; continue; }
