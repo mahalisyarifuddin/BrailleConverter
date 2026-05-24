@@ -457,9 +457,9 @@
                 </div>
                 <div class="panel-body">
                     <div class="tabs">
-                        <div class="tab active" onclick="app.setTab('unicode')" id="unicodeLabel">Braille Unicode</div>
-                        <div class="tab" onclick="app.setTab('dots')" id="dotsLabel">Dot Notation</div>
-                        <div class="tab" onclick="app.setTab('visual')" id="visualLabel">Visual Cells <span class="tag-grade" style="font-size: 9px; padding: 2px 6px; margin-left:4px">New</span></div>
+                        <div class="tab active" onclick="app.setTab('unicode')" id="unicodeLabel"><span id="unicodeLabelText">Braille Unicode</span></div>
+                        <div class="tab" onclick="app.setTab('dots')" id="dotsLabel"><span id="dotsLabelText">Dot Notation</span></div>
+                        <div class="tab" onclick="app.setTab('visual')" id="visualLabel"><span id="visualLabelText">Visual Cells</span> <span class="tag-grade" id="newTag" style="font-size: 9px; padding: 2px 6px; margin-left:4px">New</span></div>
                     </div>
                     <div id="unicodeOutput" class="output-display braille-unicode"></div>
                     <div id="dotsOutput" class="output-display dots-mono hidden"></div>
@@ -605,9 +605,10 @@
                 dirDots: 'Dot Numbers → Braille / Text',
                 inputPanelTitle: 'Source',
                 outputPanelTitle: 'Translation',
-                unicodeLabel: 'Braille Unicode',
-                dotsLabel: 'Dot Notation',
-                visualLabel: 'Visual Cells',
+                unicodeLabelText: 'Braille Unicode',
+                dotsLabelText: 'Dot Notation',
+                visualLabelText: 'Visual Cells',
+                newTag: 'New',
                 clearBtnText: 'Clear',
                 uploadBtnText: 'Upload .txt',
                 pasteBtnText: 'Paste',
@@ -640,9 +641,10 @@
                 dirDots: 'Nomor Titik → Braille / Teks',
                 inputPanelTitle: 'Sumber',
                 outputPanelTitle: 'Terjemahan',
-                unicodeLabel: 'Braille Unicode',
-                dotsLabel: 'Notasi Titik',
-                visualLabel: 'Sel Visual',
+                unicodeLabelText: 'Braille Unicode',
+                dotsLabelText: 'Notasi Titik',
+                visualLabelText: 'Sel Visual',
+                newTag: 'Baru',
                 clearBtnText: 'Hapus',
                 uploadBtnText: 'Unggah .txt',
                 pasteBtnText: 'Tempel',
