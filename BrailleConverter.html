@@ -504,7 +504,10 @@
             while (i < processed.length) {
                 const ch = processed[i];
                 if (ch === '\n' || ch === '\r' || ch === ' ' || ch === '\t') {
-                    inNum = false; cells.push({braille: BLANK, source: ch==='\n'||ch==='\r'?'↵':ch, isSpace: true}); i++; continue;
+                    inNum = false;
+                    const isLineBreak = ch === '\n' || ch === '\r';
+                    cells.push({braille: isLineBreak ? ch : BLANK, source: isLineBreak ? '↵' : ch, isSpace: true});
+                    i++; continue;
                 }
                 if (DIGITS[ch]) {
                     if (!inNum) { cells.push({braille: NUM_SIGN, source: '⠼', isPrefix: true}); inNum = true; }
@@ -558,6 +561,7 @@
             const revDigits = {"\u281a": "0", "\u2801": "1", "\u2803": "2", "\u2809": "3", "\u2819": "4", "\u2811": "5", "\u280b": "6", "\u281b": "7", "\u2813": "8", "\u280a": "9"};
             while (i < input.length) {
                 const ch = input[i];
+                if (ch === '\n' || ch === '\r') { result += ch; inNum = false; i++; continue; }
                 if (ch === ' ' || ch === BLANK) { result += ' '; inNum = false; i++; continue; }
                 if (ch === CAP_SIGN) { capNext = true; i++; continue; }
                 if (ch === NUM_SIGN) { inNum = true; i++; continue; }
@@ -754,12 +758,16 @@
                 let cells = [];
                 if(this.mode === 'tb') {
                     cells = textToBraille(input, script);
-                    uniOut.innerText = cells.map(c=>c.braille).join('');
-                    dotsOut.innerText = cells.map(c=>c.isSpace ? '0' : (charToDots(c.braille).join('') || '0')).join(' ');
+                    uniOut.textContent = cells.map(c=>c.braille).join('');
+                    dotsOut.textContent = cells.map(c => {
+                        if (c.braille === '\n' || c.braille === '\r') return c.braille;
+                        return c.isSpace ? '0' : (charToDots(c.braille).join('') || '0');
+                    }).join(' ').replace(/\s?\n\s?/g, '\n').replace(/\s?\r\s?/g, '\r').trim();
                 } else if(this.mode === 'bt') {
-                    textOut.innerText = brailleToText(input, script);
+                    textOut.textContent = brailleToText(input, script);
                     for(const ch of input) {
                         if(ch >= '\u2800' && ch <= '\u28FF') cells.push({braille:ch, source:'?'});
+                        else if(ch === '\n' || ch === '\r') cells.push({braille:ch, source:'↵', isSpace:true});
                         else if(ch === ' ') cells.push({braille:BLANK, isSpace:true});
                     }
                 } else {
@@ -770,8 +778,8 @@
                         cells.push({braille:b, source:t});
                     }
                     const uni = cells.map(c=>c.braille).join('');
-                    uniOut.innerText = uni;
-                    textOut.innerText = brailleToText(uni, script);
+                    uniOut.textContent = uni;
+                    textOut.textContent = brailleToText(uni, script);
                 }
 
                 this.renderVisual(cells);
@@ -786,6 +794,7 @@
                 const wrap = document.getElementById('visualOutput');
                 wrap.innerHTML = '';
                 cells.forEach(c => {
+                    if(c.braille === '\n' || c.braille === '\r') { wrap.innerHTML += '<div style="flex-basis:100%; height:0"></div>'; return; }
                     if(c.isSpace) { wrap.innerHTML += '<div style="width:20px"></div>'; return; }
                     const dots = charToDots(c.braille);
                     let dotsHtml = '';

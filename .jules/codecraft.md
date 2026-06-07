@@ -12,3 +12,8 @@
 **Mode:** Medic
 **Learning:** In the centralized internationalization system where IDs in the 'text' object map directly to HTML elements, assigning to 'innerText' wipes out any child HTML (e.g., <span class="tag">). This caused the "New" tag to disappear whenever the language was toggled.
 **Action:** Wrap only the translatable text portions of a label in their own <span> elements with unique IDs, allowing the parent or sibling HTML tags to remain untouched during the translation update.
+
+## 2025-05-24 - Newline Preservation and innerText
+**Mode:** Medic
+**Learning:** Using `innerText` for Braille outputs (Unicode, Dot Notation) can cause newlines to be stripped or ignored in certain contexts, especially when combined with `.trim()`. Additionally, numeric mode in Braille should be reset upon encountering a line break.
+**Action:** Use `textContent` instead of `innerText` for updating conversion outputs to ensure newline preservation. Explicitly handle `\n` and `\r` in `textToBraille` and `brailleToText` to maintain document structure and reset state machines (like `inNum`).
