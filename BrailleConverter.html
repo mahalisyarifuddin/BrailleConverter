@@ -486,11 +486,12 @@
         const BLANK = "\u2800";
         const NUM_SIGN = "\u283c";
         const CAP_SIGN = "\u2820";
+        const SCRIPT_CACHE = {};
+        const DOTS_CACHE = Array.from({length: 64}, (_, n) => [1, 2, 3, 4, 5, 6].filter(b => n & (1 << (b - 1))));
 
         function charToDots(ch) {
             const n = ch.charCodeAt(0) - 0x2800;
-            if (n < 0 || n > 63) return [];
-            return [1, 2, 3, 4, 5, 6].filter(b=>n & (1 << (b - 1)));
+            return (n >= 0 && n < 64) ? DOTS_CACHE[n] : [];
         }
 
         function textToBraille(text, scriptKey) {
@@ -498,7 +499,11 @@
             let processed = text;
             if (script.preProcess) processed = script.preProcess(text);
             const letters = script.letters || {};
-            const sortedKeys = Object.keys(letters).sort((a,b)=>b.length - a.length);
+            if (!SCRIPT_CACHE[scriptKey]) SCRIPT_CACHE[scriptKey] = {};
+            if (!SCRIPT_CACHE[scriptKey].sortedKeys) {
+                SCRIPT_CACHE[scriptKey].sortedKeys = Object.keys(letters).sort((a, b) => b.length - a.length);
+            }
+            const sortedKeys = SCRIPT_CACHE[scriptKey].sortedKeys;
             const cells = [];
             let inNum = false, i = 0;
             while (i < processed.length) {
@@ -548,15 +553,19 @@
         function brailleToText(input, scriptKey) {
             const script = SCRIPTS[scriptKey] || SCRIPTS.zm;
             const scriptLetters = script.letters || {};
-            const el = id => document.getElementById(id); // Local helper for DOM access if needed, consistent with swap()
-            const revMap = [];
-            for (const [char, b] of Object.entries(scriptLetters)) revMap.push({ b, char });
-            for (const [char, b] of Object.entries(PUNCT)) revMap.push({ b, char });
-            for (const [char, b] of Object.entries(BASE)) revMap.push({ b, char });
-            const seen = new Set();
-            const uniqueRevMap = [];
-            for (const item of revMap) { if (!seen.has(item.b)) { uniqueRevMap.push(item); seen.add(item.b); } }
-            uniqueRevMap.sort((a, b) => b.b.length - a.b.length);
+            if (!SCRIPT_CACHE[scriptKey]) SCRIPT_CACHE[scriptKey] = {};
+            if (!SCRIPT_CACHE[scriptKey].uniqueRevMap) {
+                const revMap = [];
+                for (const [char, b] of Object.entries(scriptLetters)) revMap.push({ b, char });
+                for (const [char, b] of Object.entries(PUNCT)) revMap.push({ b, char });
+                for (const [char, b] of Object.entries(BASE)) revMap.push({ b, char });
+                const seen = new Set();
+                const uniqueRevMap = [];
+                for (const item of revMap) { if (!seen.has(item.b)) { uniqueRevMap.push(item); seen.add(item.b); } }
+                uniqueRevMap.sort((a, b) => b.b.length - a.b.length);
+                SCRIPT_CACHE[scriptKey].uniqueRevMap = uniqueRevMap;
+            }
+            const uniqueRevMap = SCRIPT_CACHE[scriptKey].uniqueRevMap;
             let result = "", i = 0, capNext = false, inNum = false;
             const revDigits = {"\u281a": "0", "\u2801": "1", "\u2803": "2", "\u2809": "3", "\u2819": "4", "\u2811": "5", "\u280b": "6", "\u281b": "7", "\u2813": "8", "\u280a": "9"};
             while (i < input.length) {
@@ -741,10 +750,12 @@
             }
 
             setTab(t) {
+                const prevTab = this.activeTab;
                 this.activeTab = t;
                 document.querySelectorAll('.tab').forEach(b => b.classList.remove('active'));
                 document.getElementById(t+'Label').classList.add('active');
                 this.updateVisibility();
+                if (t === 'visual' && prevTab !== 'visual') this.update();
             }
 
             update() {
@@ -782,7 +793,7 @@
                     textOut.textContent = brailleToText(uni, script);
                 }
 
-                this.renderVisual(cells);
+                if (this.activeTab === 'visual') this.renderVisual(cells);
                 this.updateStats(input, cells);
                 this.updateVisibility();
 
@@ -792,22 +803,23 @@
 
             renderVisual(cells) {
                 const wrap = document.getElementById('visualOutput');
-                wrap.innerHTML = '';
+                const html = [];
                 cells.forEach(c => {
-                    if(c.braille === '\n' || c.braille === '\r') { wrap.innerHTML += '<div style="flex-basis:100%; height:0"></div>'; return; }
-                    if(c.isSpace) { wrap.innerHTML += '<div style="width:20px"></div>'; return; }
+                    if(c.braille === '\n' || c.braille === '\r') { html.push('<div style="flex-basis:100%; height:0"></div>'); return; }
+                    if(c.isSpace) { html.push('<div style="width:20px"></div>'); return; }
                     const dots = charToDots(c.braille);
                     let dotsHtml = '';
                     [1,4,2,5,3,6].forEach(p => {
                         dotsHtml += `<div class="dot ${dots.includes(p)?'on':''}"></div>`;
                     });
-                    wrap.innerHTML += `
+                    html.push(`
                         <div class="cell-unit">
                             <div class="cell-dots">${dotsHtml}</div>
                             <div class="cell-label">${c.source||''}</div>
                         </div>
-                    `;
+                    `);
                 });
+                wrap.innerHTML = html.join('');
             }
 
             updateStats(input, cells) {

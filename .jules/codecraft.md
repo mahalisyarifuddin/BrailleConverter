@@ -17,3 +17,8 @@
 **Mode:** Medic
 **Learning:** Using `innerText` for Braille outputs (Unicode, Dot Notation) can cause newlines to be stripped or ignored in certain contexts, especially when combined with `.trim()`. Additionally, numeric mode in Braille should be reset upon encountering a line break.
 **Action:** Use `textContent` instead of `innerText` for updating conversion outputs to ensure newline preservation. Explicitly handle `\n` and `\r` in `textToBraille` and `brailleToText` to maintain document structure and reset state machines (like `inNum`).
+
+## 2025-05-25 - DOM Reflow Bottleneck in Real-time Rendering
+**Mode:** Bolt
+**Learning:** In applications with real-time conversion (on 'input' events), updating a large visual grid using `element.innerHTML += htmlChunk` creates an O(n²) performance bottleneck due to repeated DOM parsing and layout reflows. This becomes especially visible when the output grows beyond a few lines.
+**Action:** Always batch DOM updates by building an array of HTML strings and performing a single `innerHTML` assignment. Additionally, defer expensive rendering (like the visual grid) unless the corresponding tab is active.
