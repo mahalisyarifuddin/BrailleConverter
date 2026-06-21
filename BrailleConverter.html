@@ -797,6 +797,13 @@
                 this.updateStats(input, cells);
                 this.updateVisibility();
 
+                // UX: Automatically scroll active output panels to the bottom for a smoother experience
+                if (document.getElementById('autoScroll').checked) {
+                    document.querySelectorAll('.output-display:not(.hidden)').forEach(el => {
+                        el.scrollTop = el.scrollHeight;
+                    });
+                }
+
                 const capKey = this.mode === 'tb' ? 'captionTB' : (this.mode === 'bt' ? 'captionBT' : 'captionDots');
                 document.getElementById('inputCaption').innerText = text[this.lang][capKey];
             }
