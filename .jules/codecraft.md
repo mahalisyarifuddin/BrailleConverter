@@ -22,3 +22,8 @@
 **Mode:** Bolt
 **Learning:** In applications with real-time conversion (on 'input' events), updating a large visual grid using `element.innerHTML += htmlChunk` creates an O(n²) performance bottleneck due to repeated DOM parsing and layout reflows. This becomes especially visible when the output grows beyond a few lines.
 **Action:** Always batch DOM updates by building an array of HTML strings and performing a single `innerHTML` assignment. Additionally, defer expensive rendering (like the visual grid) unless the corresponding tab is active.
+
+## 2026-06-27 - Redundant String Allocations in Real-time Conversion
+**Mode:** Bolt
+**Learning:** Performing `processed.toLowerCase()` inside a nested loop for every character in the input string leads to (N^2 \times M)$ string allocations. In real-time converters, this causes noticeable lag on large inputs (40KB+).
+**Action:** Pre-calculate the lowercase input once and cache lowercase script keys in `SCRIPT_CACHE` to eliminate redundant allocations in the hot matching loop.
