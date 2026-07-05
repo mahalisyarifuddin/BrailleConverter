@@ -787,11 +787,18 @@
                         else if(ch === ' ') cells.push({braille:BLANK, isSpace:true});
                     }
                 } else {
-                    const tokens = input.trim().split(/\s+/);
-                    for(const t of tokens) {
-                        if(!t) continue;
-                        const b = String.fromCharCode(0x2800 + [...new Set([...t].map(Number))].reduce((s,x)=>s+(1<<(x-1)),0));
-                        cells.push({braille:b, source:t});
+                    const lines = input.split(/(\r?\n)/);
+                    for(const line of lines) {
+                        if(line === '\n' || line === '\r' || line === '\r\n') {
+                            cells.push({braille:line, source:'↵', isSpace:true});
+                            continue;
+                        }
+                        const tokens = line.trim().split(/\s+/);
+                        for(const t of tokens) {
+                            if(!t) continue;
+                            const b = String.fromCharCode(0x2800 + [...new Set([...t].map(Number))].reduce((s,x)=>s+(1<<(x-1)),0));
+                            cells.push({braille:b, source:t});
+                        }
                     }
                     const uni = cells.map(c=>c.braille).join('');
                     uniOut.textContent = uni;
