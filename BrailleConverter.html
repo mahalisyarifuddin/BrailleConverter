@@ -48,6 +48,20 @@
         }
 
         * { box-sizing: border-box; margin: 0; padding: 0; }
+
+        /* Focus styles for enhanced accessibility during keyboard navigation */
+        button:focus-visible,
+        select:focus-visible,
+        input[type="checkbox"]:focus-visible {
+            outline: 2px solid var(--primary);
+            outline-offset: 2px;
+        }
+        textarea:focus-visible {
+            outline: none;
+            box-shadow: inset 0 0 0 2px var(--primary);
+            border-radius: 4px;
+        }
+
         body {
             background: var(--background);
             color: var(--text);
@@ -208,9 +222,13 @@
             font-weight: 500;
             color: var(--text-secondary);
             cursor: pointer;
+            border: none;
             border-bottom: 3px solid transparent;
+            background: transparent;
             display: flex;
             align-items: center;
+            outline: none;
+            font-family: inherit;
         }
         .tab.active { color: var(--primary); border-bottom-color: var(--primary); }
 
@@ -274,6 +292,9 @@
             cursor: pointer;
             margin: 0 4px;
             transition: background 0.2s;
+            padding: 0;
+            outline: none;
+            font-family: inherit;
         }
         .swap-circle:hover { background: var(--hover); }
 
@@ -306,7 +327,7 @@
         <div class="settings-card">
             <div class="setting-row">
                 <div class="setting-group">
-                    <span class="label" id="scriptLabel">Script</span>
+                    <label class="label" id="scriptLabel" for="script">Script</label>
 <select id="script">
 <option value="ak">Akan (Ghanaian)</option>
 <option value="az">Azərbaycan (Azerbaijani)</option>
@@ -392,9 +413,9 @@
                         <button class="mode-btn active" id="btnTB" onclick="app.setMode('tb')">
                             <span id="dirTB">Text → Braille</span>
                         </button>
-                        <div class="swap-circle" id="swapBtn" onclick="app.swap()">
+                        <button class="swap-circle" id="swapBtn" type="button" onclick="app.swap()" aria-label="Swap directions" title="Swap directions">
                             <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M6.99 11L3 15l3.99 4v-3H14v-2H6.99v-3zM21 9l-3.99-4v3H10v2h7.01v3L21 9z"/></svg>
-                        </div>
+                        </button>
                         <button class="mode-btn" id="btnBT" onclick="app.setMode('bt')">
                             <span id="dirBT">Braille → Text</span>
                         </button>
@@ -456,10 +477,10 @@
                     </div>
                 </div>
                 <div class="panel-body">
-                    <div class="tabs">
-                        <div class="tab active" onclick="app.setTab('unicode')" id="unicodeLabel"><span id="unicodeLabelText">Braille Unicode</span></div>
-                        <div class="tab" onclick="app.setTab('dots')" id="dotsLabel"><span id="dotsLabelText">Dot Notation</span></div>
-                        <div class="tab" onclick="app.setTab('visual')" id="visualLabel"><span id="visualLabelText">Visual Cells</span> <span class="tag-grade" id="newTag" style="font-size: 9px; padding: 2px 6px; margin-left:4px">New</span></div>
+                    <div class="tabs" role="tablist">
+                        <button class="tab active" onclick="app.setTab('unicode')" id="unicodeLabel" role="tab" aria-selected="true" type="button"><span id="unicodeLabelText">Braille Unicode</span></button>
+                        <button class="tab" onclick="app.setTab('dots')" id="dotsLabel" role="tab" aria-selected="false" type="button"><span id="dotsLabelText">Dot Notation</span></button>
+                        <button class="tab" onclick="app.setTab('visual')" id="visualLabel" role="tab" aria-selected="false" type="button"><span id="visualLabelText">Visual Cells</span> <span class="tag-grade" id="newTag" style="font-size: 9px; padding: 2px 6px; margin-left:4px">New</span></button>
                     </div>
                     <div id="unicodeOutput" class="output-display braille-unicode"></div>
                     <div id="dotsOutput" class="output-display dots-mono hidden"></div>
@@ -757,8 +778,15 @@
             setTab(t) {
                 const prevTab = this.activeTab;
                 this.activeTab = t;
-                document.querySelectorAll('.tab').forEach(b => b.classList.remove('active'));
-                document.getElementById(t+'Label').classList.add('active');
+                document.querySelectorAll('.tab').forEach(b => {
+                    b.classList.remove('active');
+                    b.setAttribute('aria-selected', 'false');
+                });
+                const activeBtn = document.getElementById(t+'Label');
+                if (activeBtn) {
+                    activeBtn.classList.add('active');
+                    activeBtn.setAttribute('aria-selected', 'true');
+                }
                 this.updateVisibility();
                 if (t === 'visual' && prevTab !== 'visual') this.update();
             }
@@ -887,6 +915,13 @@
                     const node = document.getElementById(k);
                     if(node) node.innerText = text[l][k] || text.en[k];
                 });
+                // Dynamically translate swap button accessibility labels without wiping out the inner SVG icon
+                const swapBtn = document.getElementById('swapBtn');
+                if (swapBtn) {
+                    const label = l === 'id' ? 'Tukar arah' : 'Swap directions';
+                    swapBtn.setAttribute('aria-label', label);
+                    swapBtn.setAttribute('title', label);
+                }
                 this.update();
             }
 
