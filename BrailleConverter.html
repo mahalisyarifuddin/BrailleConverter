@@ -278,6 +278,20 @@
             color: var(--text-secondary);
         }
 
+        .footer-link {
+            background: transparent;
+            border: none;
+            font-size: 12px;
+            color: var(--text-secondary);
+            cursor: pointer;
+            text-decoration: underline;
+            padding: 0;
+            font-family: inherit;
+        }
+        .footer-link:hover {
+            color: var(--primary);
+        }
+
         .hidden { display: none !important; }
 
         .swap-circle {
@@ -301,6 +315,7 @@
         @media (max-width: 900px) {
             .main-layout { grid-template-columns: 1fr; }
             .panel { min-height: 400px; }
+            .global-footer { flex-direction: column; gap: 12px; text-align: center; align-items: center; }
         }
     </style>
 </head>
@@ -495,6 +510,18 @@
             </div>
         </div>
 
+        <footer class="global-footer">
+            <div>
+                <strong id="privateLabel">Private & Secure</strong> — <span id="privateSub">All processing happens in your browser</span>
+            </div>
+            <div style="display: flex; gap: 16px;">
+                <span id="supportsLangs">Supports 70+ languages and scripts</span>
+                <span style="color: var(--border)">|</span>
+                <button id="kbdShortcuts" class="footer-link" type="button">Keyboard Shortcuts</button>
+                <span style="color: var(--border)">|</span>
+                <button id="helpLabel" class="footer-link" type="button">Help</button>
+            </div>
+        </footer>
 
     </div>
 
@@ -667,7 +694,9 @@
                 wordCount: 'Word count: ',
                 brailleCells: 'Braille cells: ',
                 characters: 'Characters: ',
-                charsPlural: ' characters'
+                charsPlural: ' characters',
+                shortcutsAlert: 'Keyboard Shortcuts:\n\n• Alt + T: Text → Braille\n• Alt + B: Braille → Text\n• Alt + D: Dot Numbers → Braille\n• Alt + S: Swap directions\n• Alt + C: Clear',
+                helpAlert: 'Braille Converter Help:\n\n1. Select the desired Script.\n2. Choose the conversion Mode.\n3. Input text in the Source panel.\n4. The conversion updates in real-time in the Translation panel.'
             },
             id: {
                 title: 'Konverter Braille',
@@ -703,7 +732,9 @@
                 wordCount: 'Jumlah kata: ',
                 brailleCells: 'Sel Braille: ',
                 characters: 'Karakter: ',
-                charsPlural: ' karakter'
+                charsPlural: ' karakter',
+                shortcutsAlert: 'Pintasan Keyboard:\n\n• Alt + T: Teks → Braille\n• Alt + B: Braille → Teks\n• Alt + D: Nomor Titik → Braille\n• Alt + S: Tukar Arah\n• Alt + C: Hapus',
+                helpAlert: 'Bantuan Konverter Braille:\n\n1. Pilih Aksara yang diinginkan.\n2. Pilih Mode konversi.\n3. Masukkan teks di panel Sumber.\n4. Hasil konversi akan tampil otomatis di panel Terjemahan.'
             }
         };
 
@@ -726,7 +757,7 @@
                 el('copyAllBtn').onclick = () => {
                     const out = document.querySelector('.output-display:not(.hidden)');
                     if(!out) return;
-                    navigator.clipboard.writeText(out.innerText).then(()=>{
+                    navigator.clipboard.writeText(out.textContent).then(()=>{
                         const b = el('copyAllBtnText');
                         const old = b.innerText; b.innerText = text[this.lang].copiedBtn;
                         setTimeout(()=>b.innerText = old, 1500);
@@ -741,6 +772,27 @@
                     };
                     inp.click();
                 };
+
+                // Click handlers for the new footer links
+                el('kbdShortcuts').onclick = () => {
+                    alert(text[this.lang].shortcutsAlert);
+                };
+                el('helpLabel').onclick = () => {
+                    alert(text[this.lang].helpAlert + '\n\n' + text[this.lang].captionTB);
+                };
+
+                // Keyboard shortcuts listener
+                window.addEventListener('keydown', e => {
+                    if (e.altKey && !e.ctrlKey && !e.metaKey) {
+                        const key = e.key.toLowerCase();
+                        if (key === 't') { e.preventDefault(); this.setMode('tb'); }
+                        else if (key === 'b') { e.preventDefault(); this.setMode('bt'); }
+                        else if (key === 'd') { e.preventDefault(); this.setMode('dots'); }
+                        else if (key === 's') { e.preventDefault(); this.swap(); }
+                        else if (key === 'c') { e.preventDefault(); el('inputArea').value = ''; this.update(); }
+                    }
+                });
+
                 this.setLang(this.lang);
                 this.setTheme('auto');
             }
