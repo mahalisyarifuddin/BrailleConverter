@@ -543,20 +543,58 @@
         }
 
         function textToBraille(text, scriptKey) {
-            // Bolt Optimization: Pre-calculate lowercase and cache script metadata
-            // to minimize string allocations in the matching loop.
+            // Bolt Optimization: Pre-calculate lowercase, cache script metadata, and group
+            // keys by first character to minimize allocations and linear scans in the matching loop.
             const script = SCRIPTS[scriptKey] || SCRIPTS.zm;
             let processed = text;
             if (script.preProcess) processed = script.preProcess(text);
             const letters = script.letters || {};
             if (!SCRIPT_CACHE[scriptKey]) SCRIPT_CACHE[scriptKey] = {};
-            if (!SCRIPT_CACHE[scriptKey].sortedKeysData) {
+            if (!SCRIPT_CACHE[scriptKey].groupedKeysData) {
                 const keys = Object.keys(letters).sort((a, b) => b.length - a.length);
-                SCRIPT_CACHE[scriptKey].sortedKeysData = keys.map(k => ({ key: k, keyLower: k.toLowerCase() }));
+                const grouped = {};
+                for (const k of keys) {
+                    const firstChar = k[0].toLowerCase();
+                    if (!grouped[firstChar]) grouped[firstChar] = [];
+                    grouped[firstChar].push({ key: k, keyLower: k.toLowerCase() });
+                }
+                SCRIPT_CACHE[scriptKey].groupedKeysData = grouped;
+                SCRIPT_CACHE[scriptKey].hasKeys = keys.length > 0;
             }
-            const sortedKeysData = SCRIPT_CACHE[scriptKey].sortedKeysData;
+            const groupedKeysData = SCRIPT_CACHE[scriptKey].groupedKeysData;
+            const hasKeys = SCRIPT_CACHE[scriptKey].hasKeys;
             const cells = [];
             let inNum = false, i = 0;
+
+            // Fast path for scripts with no custom characters
+            if (!hasKeys) {
+                while (i < processed.length) {
+                    const ch = processed[i];
+                    if (ch === '\n' || ch === '\r' || ch === ' ' || ch === '\t') {
+                        inNum = false;
+                        const isLineBreak = ch === '\n' || ch === '\r';
+                        cells.push({braille: isLineBreak ? ch : BLANK, source: isLineBreak ? '↵' : ch, isSpace: true});
+                        i++; continue;
+                    }
+                    if (DIGITS[ch]) {
+                        if (!inNum) { cells.push({braille: NUM_SIGN, source: '⠼', isPrefix: true}); inNum = true; }
+                        cells.push({braille: DIGITS[ch], source: ch}); i++; continue;
+                    }
+                    inNum = false;
+                    const chLower = ch.toLowerCase();
+                    if (BASE[chLower]) {
+                        if (ch !== chLower) cells.push({braille: CAP_SIGN, source: '⠠', isPrefix: true});
+                        cells.push({braille: BASE[chLower], source: ch});
+                    } else if (PUNCT[ch]) {
+                        cells.push({braille: PUNCT[ch], source: ch});
+                    } else {
+                        cells.push({braille: BLANK, source: ch});
+                    }
+                    i++;
+                }
+                return cells;
+            }
+
             const processedLower = processed.toLowerCase();
             while (i < processed.length) {
                 const ch = processed[i];
@@ -573,19 +611,22 @@
                 inNum = false;
                 let found = false;
                 const chLower = processedLower[i];
-                for (const { key, keyLower } of sortedKeysData) {
-                    if (processedLower.startsWith(keyLower, i)) {
-                        const source = processed.substring(i, i + key.length);
-                        if (source !== keyLower && source === source.toUpperCase()) cells.push({braille: CAP_SIGN, source: '⠠', isPrefix: true});
-                        const brailleStr = letters[key];
-                        if (script.halantPrefix && key === script.halantChar && cells.length > 0) {
-                            const last = cells.pop();
-                            cells.push({braille: brailleStr[0], source: key, isPrefix: true});
-                            cells.push(last);
-                        } else {
-                            for (const b of brailleStr) cells.push({braille: b, source: key.length === 1 ? key : source});
+                const candidates = groupedKeysData[chLower];
+                if (candidates) {
+                    for (const { key, keyLower } of candidates) {
+                        if (processedLower.startsWith(keyLower, i)) {
+                            const source = processed.substring(i, i + key.length);
+                            if (source !== keyLower && source === source.toUpperCase()) cells.push({braille: CAP_SIGN, source: '⠠', isPrefix: true});
+                            const brailleStr = letters[key];
+                            if (script.halantPrefix && key === script.halantChar && cells.length > 0) {
+                                const last = cells.pop();
+                                cells.push({braille: brailleStr[0], source: key, isPrefix: true});
+                                cells.push(last);
+                            } else {
+                                for (const b of brailleStr) cells.push({braille: b, source: key.length === 1 ? key : source});
+                            }
+                            i += key.length; found = true; break;
                         }
-                        i += key.length; found = true; break;
                     }
                 }
                 if (!found) {
