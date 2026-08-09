@@ -27,3 +27,8 @@
 **Mode:** Bolt
 **Learning:** Performing `processed.toLowerCase()` inside a nested loop for every character in the input string leads to (N^2 \times M)$ string allocations. In real-time converters, this causes noticeable lag on large inputs (40KB+).
 **Action:** Pre-calculate the lowercase input once and cache lowercase script keys in `SCRIPT_CACHE` to eliminate redundant allocations in the hot matching loop.
+
+## 2026-07-01 - Key Grouping and Fast Path for Key-less Scripts in Match Loops
+**Mode:** Bolt
+**Learning:** Even with pre-calculated lowercase input, executing `processedLower.startsWith(keyLower, i)` inside a nested loop over all sorted language keys results in an $O(L)$ linear scan per character, which becomes a severe bottleneck for scripts with hundreds of custom letters (like Amharic, Dzongkha, or Hindi). Furthermore, scripts with no custom characters still paid the cost of an empty loop.
+**Action:** Group custom script keys by their first character (lowercased) in the cache, and retrieve only those candidate keys matching the current character to reduce matching search space. Check a cached `hasKeys` flag and employ a direct, fast path for scripts with no custom letters.
