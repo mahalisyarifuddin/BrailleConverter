@@ -645,10 +645,12 @@
         }
 
         function brailleToText(input, scriptKey) {
+            // Bolt Optimization: Group unique reverse mappings by their initial Braille cell character in SCRIPT_CACHE
+            // to restrict prefix matching checks to a small subset of relevant candidate mappings.
             const script = SCRIPTS[scriptKey] || SCRIPTS.zm;
             const scriptLetters = script.letters || {};
             if (!SCRIPT_CACHE[scriptKey]) SCRIPT_CACHE[scriptKey] = {};
-            if (!SCRIPT_CACHE[scriptKey].uniqueRevMap) {
+            if (!SCRIPT_CACHE[scriptKey].groupedRevMap) {
                 const revMap = [];
                 for (const [char, b] of Object.entries(scriptLetters)) revMap.push({ b, char });
                 for (const [char, b] of Object.entries(PUNCT)) revMap.push({ b, char });
@@ -657,9 +659,18 @@
                 const uniqueRevMap = [];
                 for (const item of revMap) { if (!seen.has(item.b)) { uniqueRevMap.push(item); seen.add(item.b); } }
                 uniqueRevMap.sort((a, b) => b.b.length - a.b.length);
+
+                const groupedRevMap = {};
+                for (const item of uniqueRevMap) {
+                    const firstCell = item.b[0];
+                    if (!groupedRevMap[firstCell]) groupedRevMap[firstCell] = [];
+                    groupedRevMap[firstCell].push(item);
+                }
                 SCRIPT_CACHE[scriptKey].uniqueRevMap = uniqueRevMap;
+                SCRIPT_CACHE[scriptKey].groupedRevMap = groupedRevMap;
             }
             const uniqueRevMap = SCRIPT_CACHE[scriptKey].uniqueRevMap;
+            const groupedRevMap = SCRIPT_CACHE[scriptKey].groupedRevMap;
             let result = "", i = 0, capNext = false, inNum = false;
             const revDigits = {"\u281a": "0", "\u2801": "1", "\u2803": "2", "\u2809": "3", "\u2819": "4", "\u2811": "5", "\u280b": "6", "\u281b": "7", "\u2813": "8", "\u280a": "9"};
             while (i < input.length) {
@@ -688,11 +699,14 @@
                 }
 
                 let matched = false;
-                for (const { b, char } of uniqueRevMap) {
-                    if (input.startsWith(b, i)) {
-                        let text = char;
-                        if (capNext) { text = text.toUpperCase(); capNext = false; }
-                        result += text; i += b.length; matched = true; break;
+                const candidates = groupedRevMap[ch];
+                if (candidates) {
+                    for (const { b, char } of candidates) {
+                        if (input.startsWith(b, i)) {
+                            let text = char;
+                            if (capNext) { text = text.toUpperCase(); capNext = false; }
+                            result += text; i += b.length; matched = true; break;
+                        }
                     }
                 }
                 if (!matched) { result += '?'; i++; capNext = false; }
