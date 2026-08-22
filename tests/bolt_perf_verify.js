@@ -4,17 +4,18 @@ const { performance } = require('perf_hooks');
 
 const html = fs.readFileSync(path.resolve(__dirname, '../BrailleConverter.html'), 'utf8');
 
-const scriptMatch = html.match(/<script>([\s\S]*?)<\/script>/);
-const scriptContent = scriptMatch[1].replace(/class App \{[\s\S]*?window\.app = new App\(\);/s, '');
+const scriptMatches = [...html.matchAll(/<script>([\s\S]*?)<\/script>/g)];
+let scriptContent = scriptMatches.map(m => m[1]).join('\n');
+scriptContent = scriptContent.replace(/class App \{[\s\S]*?window\.app = new App\(\);/s, '');
 
 const sandbox = {
-    document: { getElementById: () => ({}), documentElement: {}, querySelectorAll: () => [] },
+    document: { getElementById: () => ({}), documentElement: {}, querySelectorAll: () => [], addEventListener: () => {} },
     navigator: { language: 'en' },
-    window: {},
     console: console,
     setTimeout: () => {}
 };
 sandbox.window = sandbox;
+sandbox.matchMedia = () => ({ addEventListener: () => {}, matches: false });
 
 const fn = new Function('sandbox', `
     with (sandbox) {

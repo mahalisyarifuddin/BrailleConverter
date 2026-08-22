@@ -2047,6 +2047,7 @@
                 const visOut = document.getElementById('visualOutput');
 
                 let cells = [];
+                let decodedText = '';
                 if(this.mode === 'tb') {
                     cells = textToBraille(input, script);
                     uniOut.textContent = cells.map(c=>c.braille).join('');
@@ -2055,7 +2056,8 @@
                         return c.isSpace ? '0' : (charToDots(c.braille).join('') || '0');
                     }).join(' ').replace(/\s?\n\s?/g, '\n').replace(/\s?\r\s?/g, '\r').trim();
                 } else if(this.mode === 'bt') {
-                    textOut.textContent = brailleToText(input, script);
+                    decodedText = brailleToText(input, script);
+                    textOut.textContent = decodedText;
                     for(const ch of input) {
                         if(ch >= '\u2800' && ch <= '\u28FF') cells.push({braille:ch, source:'?'});
                         else if(ch === '\n' || ch === '\r') cells.push({braille:ch, source:'↵', isSpace:true});
@@ -2077,11 +2079,12 @@
                     }
                     const uni = cells.map(c=>c.braille).join('');
                     uniOut.textContent = uni;
-                    textOut.textContent = brailleToText(uni, script);
+                    decodedText = brailleToText(uni, script);
+                    textOut.textContent = decodedText;
                 }
 
                 if (this.activeTab === 'visual') this.renderVisual(cells);
-                this.updateStats(input, cells);
+                this.updateStats(input, cells, decodedText);
                 this.updateVisibility();
 
                 // UX: Automatically scroll active output panels to the bottom for a smoother experience
@@ -2092,7 +2095,7 @@
                 }
 
                 const capKey = this.mode === 'tb' ? 'captionTB' : (this.mode === 'bt' ? 'captionBT' : 'captionDots');
-                document.getElementById('inputCaption').innerText = text[this.lang][capKey];
+                document.getElementById('inputCaption').textContent = text[this.lang][capKey];
             }
 
             renderVisual(cells) {
@@ -2116,24 +2119,17 @@
                 wrap.innerHTML = html.join('');
             }
 
-            updateStats(input, cells) {
+            updateStats(input, cells, decodedText = '') {
                 const t = text[this.lang];
-                document.getElementById('topCount').innerText = input.length + t.charsPlural;
-                document.getElementById('sourceCharCount').innerText = t.charCount + input.length;
-                document.getElementById('sourceWordCount').innerText = t.wordCount + (input.trim() ? input.trim().split(/\s+/).length : 0);
+                document.getElementById('topCount').textContent = input.length + t.charsPlural;
+                document.getElementById('sourceCharCount').textContent = t.charCount + input.length;
+                document.getElementById('sourceWordCount').textContent = t.wordCount + (input.trim() ? input.trim().split(/\s+/).length : 0);
 
                 const cellCount = cells.filter(c=>!c.isSpace).length;
-                document.getElementById('outputCellCount').innerText = t.brailleCells + cellCount;
+                document.getElementById('outputCellCount').textContent = t.brailleCells + cellCount;
 
-                let charCount = 0;
-                if(this.mode === 'tb') {
-                    charCount = input.length;
-                } else if(this.mode === 'bt') {
-                    charCount = document.getElementById('textOutput').innerText.length;
-                } else {
-                    charCount = document.getElementById('textOutput').innerText.length;
-                }
-                document.getElementById('outputCharCount').innerText = t.characters + charCount;
+                const charCount = (this.mode === 'tb') ? input.length : decodedText.length;
+                document.getElementById('outputCharCount').textContent = t.characters + charCount;
             }
 
             updateVisibility() {

@@ -32,3 +32,8 @@
 **Mode:** Bolt
 **Learning:** Even with pre-calculated lowercase input, executing `processedLower.startsWith(keyLower, i)` inside a nested loop over all sorted language keys results in an $O(L)$ linear scan per character, which becomes a severe bottleneck for scripts with hundreds of custom letters (like Amharic, Dzongkha, or Hindi). Furthermore, scripts with no custom characters still paid the cost of an empty loop.
 **Action:** Group custom script keys by their first character (lowercased) in the cache, and retrieve only those candidate keys matching the current character to reduce matching search space. Check a cached `hasKeys` flag and employ a direct, fast path for scripts with no custom letters.
+
+## 2026-07-02 - Layout Reflow Bottleneck in Real-Time Stat Calculation
+**Mode:** Bolt
+**Learning:** Calling `innerText` on output elements (like `#textOutput`) in `oninput` handlers forces the browser to flush pending DOM updates and recalculate layout synchronously on every keystroke.
+**Action:** Pass calculated values directly from JavaScript memory into UI stat methods and use `textContent` instead of `innerText` to prevent synchronous DOM layout recalculations.
