@@ -3,32 +3,36 @@ const path = require('path');
 
 const html = fs.readFileSync(path.resolve(__dirname, '../BrailleConverter.html'), 'utf8');
 
-const scriptMatch = html.match(/<script>([\s\S]*?)<\/script>/);
-if (!scriptMatch) {
-    console.error('Could not find script block');
+const scripts = html.match(/<script[\s\S]*?<\/script>/g) || [];
+const appScript = scripts.find(s => s.includes('brailleToText'));
+if (!appScript) {
+    console.error('Could not find script block containing brailleToText');
     process.exit(1);
 }
 
-let scriptContent = scriptMatch[1];
+let scriptContent = appScript.replace(/<\/?script>/g, '');
 
 // Remove the App class and window.app initialization to avoid DOM issues
 scriptContent = scriptContent.replace(/class App \{[\s\S]*?window\.app = new App\(\);/s, '');
 
 // Mocking needed objects to run the script content
+const AppSettings = { detectLang: () => 'en', applyLang: l => l, applyTheme: () => {} };
 const sandbox = {
     document: {
         getElementById: () => ({ onchange: null, onclick: null, value: '' }),
-        documentElement: { lang: '' },
+        documentElement: { lang: '', classList: { toggle: () => {}, add: () => {}, remove: () => {} } },
         querySelectorAll: () => []
     },
     navigator: {
         language: 'en'
     },
-    window: {},
+    window: { AppSettings, matchMedia: () => ({ matches: false, addEventListener: () => {} }), addEventListener: () => {} },
     console: console,
-    setTimeout: () => {}
+    setTimeout: () => {},
+    AppSettings
 };
-sandbox.window = sandbox;
+sandbox.window.window = sandbox.window;
+sandbox.window.document = sandbox.document;
 
 try {
     // Run the script to populate the sandbox with the constants and functions
