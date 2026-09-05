@@ -2073,8 +2073,11 @@
                         const tokens = line.trim().split(/\s+/);
                         for(const t of tokens) {
                             if(!t) continue;
-                            const b = String.fromCharCode(0x2800 + [...new Set([...t].map(Number))].reduce((s,x)=>s+(1<<(x-1)),0));
-                            cells.push({braille:b, source:t});
+                            const isSpace = t === '0';
+                            const dots = [...new Set([...t].map(Number))].filter(d => d >= 1 && d <= 6);
+                            const mask = isSpace ? 0 : dots.reduce((s,x)=>s+(1<<(x-1)),0);
+                            const b = String.fromCharCode(0x2800 + mask);
+                            cells.push({braille:b, source:t, isSpace});
                         }
                     }
                     const uni = cells.map(c=>c.braille).join('');
