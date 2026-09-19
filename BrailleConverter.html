@@ -1625,6 +1625,7 @@
         const SCRIPT_CACHE = {};
         const DOTS_CACHE = Array.from({length: 64}, (_, n) => [1, 2, 3, 4, 5, 6].filter(b => n & (1 << (b - 1))));
         const DOT_BITMASKS = [1, 8, 2, 16, 4, 32];
+        const esc = s => String(s || '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;').replace(/'/g, '&#039;');
 
         function charToDots(ch) {
             const n = ch.charCodeAt(0) - 0x2800;
@@ -2121,7 +2122,7 @@
                     } else {
                         dotsHtml = '<div class="dot"></div>'.repeat(6);
                     }
-                    html.push(`<div class="cell-unit"><div class="cell-dots">${dotsHtml}</div><div class="cell-label">${c.source || ''}</div></div>`);
+                    html.push(`<div class="cell-unit"><div class="cell-dots">${dotsHtml}</div><div class="cell-label">${esc(c.source)}</div></div>`);
                 }
                 wrap.innerHTML = html.join('');
             }

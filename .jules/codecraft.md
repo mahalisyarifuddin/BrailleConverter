@@ -37,3 +37,8 @@
 **Mode:** Bolt
 **Learning:** Calling `innerText` on output elements (like `#textOutput`) in `oninput` handlers forces the browser to flush pending DOM updates and recalculate layout synchronously on every keystroke.
 **Action:** Pass calculated values directly from JavaScript memory into UI stat methods and use `textContent` instead of `innerText` to prevent synchronous DOM layout recalculations.
+
+## 2026-07-03 - Unescaped User Input Tokens in Visual Cell Labels
+**Mode:** Medic
+**Learning:** In Dot Numbers mode, `c.source` contains multi-character input tokens (e.g. `<b/style=color:red>hello</b>`). Interpolating `${c.source}` directly into `.cell-label` HTML without escaping HTML entities allowed active DOM elements to be injected into `wrap.innerHTML`.
+**Action:** Always wrap source strings with an HTML entity escaper (`esc()`) prior to interpolating them into HTML strings for `innerHTML` assignments.
