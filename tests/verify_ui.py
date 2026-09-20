@@ -33,6 +33,20 @@ async def run_tests():
                 print(f"❌ {tc['name']} failed: expected {tc['expected']}, got {output}")
                 all_passed = False
 
+        # Test visual cell HTML escaping
+        await page.click("#btnDots")
+        await page.click("#visualLabel")
+        await page.fill("#inputArea", "<b/style=color:red>test</b>")
+        await asyncio.sleep(0.1)
+
+        b_count = await page.eval_on_selector_all("#visualOutput b", "els => els.length")
+        labels = await page.eval_on_selector_all("#visualOutput .cell-label", "els => els.map(e => e.textContent)")
+        if b_count == 0 and "<b/style=color:red>test</b>" in labels:
+            print("✅ Visual HTML cell label sanitization passed")
+        else:
+            print(f"❌ Visual HTML cell label sanitization failed: b_count={b_count}, labels={labels}")
+            all_passed = False
+
         await browser.close()
         if not all_passed:
             exit(1)

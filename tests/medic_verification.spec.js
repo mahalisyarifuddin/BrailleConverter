@@ -41,4 +41,14 @@ test.describe('Braille Mapping Fixes', () => {
     const output = await page.textContent('#unicodeOutput');
     expect(output).toBe('\u2833');
   });
+
+  test('Visual Cell label HTML tags are sanitized', async ({ page }) => {
+    await page.click('#btnDots');
+    await page.click('#visualLabel');
+    await page.fill('#inputArea', '<b/style=color:red>test</b>');
+    const bCount = await page.locator('#visualOutput b').count();
+    expect(bCount).toBe(0);
+    const labelText = await page.textContent('#visualOutput .cell-label');
+    expect(labelText).toBe('<b/style=color:red>test</b>');
+  });
 });
