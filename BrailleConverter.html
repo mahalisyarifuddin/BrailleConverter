@@ -1767,7 +1767,8 @@
                 const ch = input[i];
                 if (ch === '\n' || ch === '\r') { result += ch; inNum = false; i++; continue; }
                 if (ch === ' ' || ch === BLANK) { result += ' '; inNum = false; i++; continue; }
-                if (ch === CAP_SIGN) { capNext = true; i++; continue; }
+                // Medic Fix: CAP_SIGN explicitly resets numeric mode when capital letters follow numbers (e.g. ⠼⠁⠠⠓ -> 1H)
+                if (ch === CAP_SIGN) { capNext = true; inNum = false; i++; continue; }
                 if (ch === NUM_SIGN) { inNum = true; i++; continue; }
                 if (inNum) { const digit = revDigits[ch]; if (digit !== undefined) { result += digit; i++; continue; } inNum = false; }
 
@@ -2084,6 +2085,10 @@
                     }
                     const uni = cells.map(c=>c.braille).join('');
                     uniOut.textContent = uni;
+                    dotsOut.textContent = cells.map(c => {
+                        if (c.braille === '\n' || c.braille === '\r') return c.braille;
+                        return c.isSpace ? '0' : (charToDots(c.braille).join('') || '0');
+                    }).join(' ').replace(/\s?\n\s?/g, '\n').replace(/\s?\r\s?/g, '\r').trim();
                     decodedText = brailleToText(uni, script);
                     textOut.textContent = decodedText;
                 }

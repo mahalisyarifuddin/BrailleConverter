@@ -42,3 +42,8 @@
 **Mode:** Medic
 **Learning:** In Dot Numbers mode, `c.source` contains multi-character input tokens (e.g. `<b/style=color:red>hello</b>`). Interpolating `${c.source}` directly into `.cell-label` HTML without escaping HTML entities allowed active DOM elements to be injected into `wrap.innerHTML`.
 **Action:** Always wrap source strings with an HTML entity escaper (`esc()`) prior to interpolating them into HTML strings for `innerHTML` assignments.
+
+## 2026-07-04 - State Reset when Parsing Prefix Indicators in Braille Decoding
+**Mode:** Medic
+**Learning:** Prefix indicators such as `CAP_SIGN` (`⠠`) appear prior to main checks in `brailleToText`. When prefix indicators transition the parser state (e.g. arming `capNext`), state machine flags like `inNum` must be explicitly reset to false, otherwise the parser remains in numeric mode and incorrectly decodes following letter cells as digits.
+**Action:** Always ensure state-modifying prefix handlers explicitly update or reset all associated parser state flags before continuing the loop.

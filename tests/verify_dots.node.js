@@ -69,3 +69,13 @@ if (textOut === 'a b' && uniOut === '⠁⠀⠃') {
     console.error('❌ Test failed! Expected text "a b" and unicode "⠁⠀⠃"');
     process.exit(1);
 }
+
+// Test 2: brailleToText capital indicator numeric mode reset (⠼⠁⠠⠓ -> "1H")
+const capNumDecoded = brailleToText('⠼⠁⠠⠓', 'en');
+console.log('Capital indicator after number: ⠼⠁⠠⠓ ->', JSON.stringify(capNumDecoded));
+if (capNumDecoded === '1H') {
+    console.log('✅ Capital indicator numeric mode reset test passed');
+} else {
+    console.error('❌ Test failed! Expected "1H", got:', JSON.stringify(capNumDecoded));
+    process.exit(1);
+}
