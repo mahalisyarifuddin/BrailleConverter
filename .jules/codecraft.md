@@ -47,3 +47,8 @@
 **Mode:** Medic
 **Learning:** Prefix indicators such as `CAP_SIGN` (`⠠`) appear prior to main checks in `brailleToText`. When prefix indicators transition the parser state (e.g. arming `capNext`), state machine flags like `inNum` must be explicitly reset to false, otherwise the parser remains in numeric mode and incorrectly decodes following letter cells as digits.
 **Action:** Always ensure state-modifying prefix handlers explicitly update or reset all associated parser state flags before continuing the loop.
+
+## 2026-07-05 - CRLF Line Break Preservation in Dot Notation and Visual Cells
+**Mode:** Medic
+**Learning:** In JavaScript regexes, `\s` includes carriage return `\r`. Post-processing patterns like `.replace(/\s?\n\s?/g, '\n')` accidentally strip `\r` from Windows CRLF (`\r\n`) line endings. Furthermore, multi-character cell strings like `c.braille = '\r\n'` fail strict single-character equality checks `c.braille === '\n' || c.braille === '\r'`, causing CRLF line breaks to be treated as space cells ('0') in Dot Numbers mode and Visual Cell grid renderer.
+**Action:** Use `/[\r\n]/.test(...)` to detect line breaks in multi-character cell objects, and use `[ \t]` explicitly instead of `\s` when trimming horizontal whitespace surrounding line breaks (`.replace(/[ \t]?(\r?\n|\r)[ \t]?/g, '$1')`).
