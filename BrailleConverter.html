@@ -2055,9 +2055,9 @@
                     cells = textToBraille(input, script);
                     uniOut.textContent = cells.map(c=>c.braille).join('');
                     dotsOut.textContent = cells.map(c => {
-                        if (c.braille === '\n' || c.braille === '\r') return c.braille;
+                        if (/[\r\n]/.test(c.braille)) return c.braille;
                         return c.isSpace ? '0' : (charToDots(c.braille).join('') || '0');
-                    }).join(' ').replace(/\s?\n\s?/g, '\n').replace(/\s?\r\s?/g, '\r').trim();
+                    }).join(' ').replace(/[ \t]?(\r?\n|\r)[ \t]?/g, '$1').trim();
                 } else if(this.mode === 'bt') {
                     decodedText = brailleToText(input, script);
                     textOut.textContent = decodedText;
@@ -2086,9 +2086,9 @@
                     const uni = cells.map(c=>c.braille).join('');
                     uniOut.textContent = uni;
                     dotsOut.textContent = cells.map(c => {
-                        if (c.braille === '\n' || c.braille === '\r') return c.braille;
+                        if (/[\r\n]/.test(c.braille)) return c.braille;
                         return c.isSpace ? '0' : (charToDots(c.braille).join('') || '0');
-                    }).join(' ').replace(/\s?\n\s?/g, '\n').replace(/\s?\r\s?/g, '\r').trim();
+                    }).join(' ').replace(/[ \t]?(\r?\n|\r)[ \t]?/g, '$1').trim();
                     decodedText = brailleToText(uni, script);
                     textOut.textContent = decodedText;
                 }
@@ -2115,7 +2115,7 @@
                 for (let i = 0; i < cells.length; i++) {
                     const c = cells[i];
                     const b = c.braille;
-                    if (b === '\n' || b === '\r') { html.push('<div style="flex-basis:100%; height:0"></div>'); continue; }
+                    if (/[\r\n]/.test(b)) { html.push('<div style="flex-basis:100%; height:0"></div>'); continue; }
                     if (c.isSpace) { html.push('<div style="width:20px"></div>'); continue; }
                     const code = b.charCodeAt(0) - 0x2800;
                     let dotsHtml = '';

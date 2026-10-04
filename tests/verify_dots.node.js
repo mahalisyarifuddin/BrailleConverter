@@ -79,3 +79,21 @@ if (capNumDecoded === '1H') {
     console.error('❌ Test failed! Expected "1H", got:', JSON.stringify(capNumDecoded));
     process.exit(1);
 }
+
+// Test 3: Dot mode CRLF line break preservation ("1\r\n12" -> dots output should be "1\r\n12")
+mockElements['inputArea'] = { value: '1\r\n12' };
+appInstance.mode = 'dots';
+appInstance.update();
+
+const crlfDotsOut = mockElements['dotsOutput'].textContent;
+const crlfTextOut = mockElements['textOutput'].textContent;
+console.log('Dot Input with CRLF: "1\\r\\n12"');
+console.log('Dots Output:', JSON.stringify(crlfDotsOut));
+console.log('Decoded Text Output:', JSON.stringify(crlfTextOut));
+
+if (crlfDotsOut === '1\r\n12' && crlfTextOut === 'a\r\nb') {
+    console.log('✅ CRLF line break preservation test passed');
+} else {
+    console.error('❌ Test failed! Expected dots "1\\r\\n12" and text "a\\r\\nb", got dots:', JSON.stringify(crlfDotsOut));
+    process.exit(1);
+}
