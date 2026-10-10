@@ -2038,7 +2038,7 @@
                     activeBtn.setAttribute('aria-selected', 'true');
                 }
                 this.updateVisibility();
-                if (t === 'visual' && prevTab !== 'visual') this.update();
+                if (prevTab !== t) this.update();
             }
 
             update() {
@@ -2054,10 +2054,12 @@
                 if(this.mode === 'tb') {
                     cells = textToBraille(input, script);
                     uniOut.textContent = cells.map(c=>c.braille).join('');
-                    dotsOut.textContent = cells.map(c => {
-                        if (/[\r\n]/.test(c.braille)) return c.braille;
-                        return c.isSpace ? '0' : (charToDots(c.braille).join('') || '0');
-                    }).join(' ').replace(/[ \t]?(\r?\n|\r)[ \t]?/g, '$1').trim();
+                    if (this.activeTab === 'dots') {
+                        dotsOut.textContent = cells.map(c => {
+                            if (/[\r\n]/.test(c.braille)) return c.braille;
+                            return c.isSpace ? '0' : (charToDots(c.braille).join('') || '0');
+                        }).join(' ').replace(/[ \t]?(\r?\n|\r)[ \t]?/g, '$1').trim();
+                    }
                 } else if(this.mode === 'bt') {
                     decodedText = brailleToText(input, script);
                     textOut.textContent = decodedText;
@@ -2085,10 +2087,12 @@
                     }
                     const uni = cells.map(c=>c.braille).join('');
                     uniOut.textContent = uni;
-                    dotsOut.textContent = cells.map(c => {
-                        if (/[\r\n]/.test(c.braille)) return c.braille;
-                        return c.isSpace ? '0' : (charToDots(c.braille).join('') || '0');
-                    }).join(' ').replace(/[ \t]?(\r?\n|\r)[ \t]?/g, '$1').trim();
+                    if (this.activeTab === 'dots') {
+                        dotsOut.textContent = cells.map(c => {
+                            if (/[\r\n]/.test(c.braille)) return c.braille;
+                            return c.isSpace ? '0' : (charToDots(c.braille).join('') || '0');
+                        }).join(' ').replace(/[ \t]?(\r?\n|\r)[ \t]?/g, '$1').trim();
+                    }
                     decodedText = brailleToText(uni, script);
                     textOut.textContent = decodedText;
                 }

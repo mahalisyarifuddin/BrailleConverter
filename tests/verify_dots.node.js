@@ -83,6 +83,7 @@ if (capNumDecoded === '1H') {
 // Test 3: Dot mode CRLF line break preservation ("1\r\n12" -> dots output should be "1\r\n12")
 mockElements['inputArea'] = { value: '1\r\n12' };
 appInstance.mode = 'dots';
+appInstance.setTab('dots');
 appInstance.update();
 
 const crlfDotsOut = mockElements['dotsOutput'].textContent;
