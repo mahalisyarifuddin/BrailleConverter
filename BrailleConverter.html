@@ -1706,7 +1706,7 @@
                     for (const { key, keyLower } of candidates) {
                         if (processedLower.startsWith(keyLower, i)) {
                             const source = processed.substring(i, i + key.length);
-                            if (source !== keyLower && source === source.toUpperCase()) cells.push({braille: CAP_SIGN, source: '⠠', isPrefix: true});
+                            if (source !== source.toLowerCase()) cells.push({braille: CAP_SIGN, source: '⠠', isPrefix: true});
                             const brailleStr = letters[key];
                             if (script.halantPrefix && key === script.halantChar && cells.length > 0) {
                                 const last = cells.pop();
